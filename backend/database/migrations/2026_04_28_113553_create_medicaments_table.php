@@ -13,19 +13,20 @@ return new class extends Migration
     {
         Schema::create('medicaments', function (Blueprint $table) {
             $table->id();
-            $table->integer("numero");
-            $table->string("photo");
+            $table->string("numero")->unique();
             $table->string("designation");
-            $table->integer("prix_achat");
-            $table->integer("prix_vente");
-            $table->integer("qte_min");
-            $table->integer("qte_dispo");
-            $table->string("utilisations");
-            $table->string("contre-indications");
-            $table->string("effets_secondaires");
-            $table->decimal("taux_prise_en_charge",5,2);
-            $table->integer("code_barre");
-            $table->date("date_expiration");
+            $table->string("categorie")->nullable();
+            $table->decimal("prix_achat", 12, 2)->default(0);
+            $table->decimal("prix_vente", 12, 2)->default(0);
+            $table->integer("qte_min")->default(0);
+            $table->integer("qte_dispo")->default(0);
+            $table->text("utilisations")->nullable();
+            $table->text("contre_indications")->nullable();
+            $table->text("effets_secondaires")->nullable();
+            $table->decimal("taux_prise_en_charge", 5, 2)->default(0);
+            $table->string("code_barre")->nullable();
+            $table->date("date_expiration")->nullable();
+            $table->string("photo")->nullable();
             $table->timestamps();
         });
     }

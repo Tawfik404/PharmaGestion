@@ -5,20 +5,23 @@ namespace Database\Factories;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Client>
- */
 class ClientFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Client::class;
+
     public function definition(): array
     {
+        $hasDiscount = fake()->boolean(30);
+
         return [
-            //
+            'nom' => fake()->lastName(),
+            'prenom' => fake()->firstName(),
+            'date_naissance' => fake()->dateTimeBetween('-80 years', '-18 years')->format('Y-m-d'),
+            'telephone' => '0' . fake()->randomElement(['5', '6', '7']) . fake()->numerify('########'),
+            'email' => fake()->unique()->safeEmail(),
+            'adresse' => fake()->streetAddress() . ', ' . fake()->city(),
+            'is_discounted' => $hasDiscount,
+            'discount_rate' => $hasDiscount ? fake()->randomElement([5, 10, 15, 20]) : 0,
         ];
     }
 }

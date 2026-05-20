@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string("prenom");
             $table->string("email");
             $table->string("password");
-            $table->integer("telephone");
+            $table->string("telephone");
             $table->enum("role", ["pharmacien", "caissier", "gestionnaire"]);
             $table->timestamps();
         });

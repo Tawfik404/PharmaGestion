@@ -15,9 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string("nom");
             $table->string("prenom");
-            $table->date("date_naissance");
-            $table->integer("telephone");
-            $table->text("adresse");
+            $table->date("date_naissance")->nullable();
+            $table->string("telephone")->nullable();
+            $table->string("email")->nullable();
+            $table->text("adresse")->nullable();
+            $table->boolean("is_discounted")->default(false);
+            $table->decimal("discount_rate", 5, 2)->default(0);
             $table->timestamps();
         });
     }

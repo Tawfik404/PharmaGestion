@@ -5,62 +5,61 @@ namespace App\Http\Controllers;
 use App\Models\Admin;
 use App\Http\Requests\StoreAdminRequest;
 use App\Http\Requests\UpdateAdminRequest;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return response()->json(Admin::all());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreAdminRequest $request)
     {
-        //
+        $donnees = $request->validated();
+        $donnees['password'] = Hash::make($donnees['password']);
+
+        return response()->json([
+            'message' => 'Utilisateur ajouté avec succès',
+            'donnees' => Admin::create($donnees),
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Admin $admin)
     {
-        //
+        return response()->json(['donnees' => $admin]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Admin $admin)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateAdminRequest $request, Admin $admin)
     {
-        //
+        $donnees = $request->validated();
+
+        if (isset($donnees['password'])) {
+            $donnees['password'] = Hash::make($donnees['password']);
+        }
+
+        $admin->update($donnees);
+
+        return response()->json([
+            'message' => 'Utilisateur mis à jour avec succès',
+            'donnees' => $admin,
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Admin $admin)
     {
-        //
+        $admin->delete();
+
+        return response()->json(['message' => 'Utilisateur supprimé avec succès']);
     }
 }

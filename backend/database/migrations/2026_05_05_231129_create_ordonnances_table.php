@@ -13,11 +13,22 @@ return new class extends Migration
     {
         Schema::create('ordonnances', function (Blueprint $table) {
             $table->id();
+            $table->string("numero")->unique();
             $table->foreignId("client_id")->constrained()->onDelete("cascade");
-            $table->foreignId("medicament_id")->constrained()->onDelete("cascade");
+            $table->foreignId("medecin_id")->nullable()->constrained()->nullOnDelete();
             $table->date("date_ordonnance");
-            $table->string("dosage_medicament");
-            $table->text("instructions_posologie");
+            $table->string("statut")->default("En attente"); // En attente, Traitée, Annulée
+            $table->string("scan_path")->nullable();
+            $table->text("notes")->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('ordonnance_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId("ordonnance_id")->constrained()->onDelete("cascade");
+            $table->foreignId("medicament_id")->constrained()->onDelete("cascade");
+            $table->string("dosage_medicament")->nullable();
+            $table->text("instructions_posologie")->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +38,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('ordonnance_items');
         Schema::dropIfExists('ordonnances');
     }
 };

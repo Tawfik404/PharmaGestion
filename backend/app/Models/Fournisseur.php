@@ -9,4 +9,11 @@ class Fournisseur extends Model
 {
     /** @use HasFactory<\Database\Factories\FournisseurFactory> */
     use HasFactory;
+
+    protected $guarded = [];
+
+    public function purchaseOrders()
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
 }

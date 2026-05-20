@@ -11,10 +11,22 @@ class Ordonnance extends Model
 {
     /** @use HasFactory<\Database\Factories\OrdonnanceFactory> */
     use HasFactory;
-        public function client(){
-            return $this->belongsTo(Client::class);
-        }
-        public function medicament(){
-            return $this->belongsTo(Medicament::class);
-        }
+
+    protected $guarded = [];
+
+    protected $casts = [
+        'date_ordonnance' => 'date',
+    ];
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function medicaments()
+    {
+        return $this->belongsToMany(Medicament::class, 'ordonnance_items')
+            ->withPivot('dosage_medicament', 'instructions_posologie')
+            ->withTimestamps();
+    }
 }

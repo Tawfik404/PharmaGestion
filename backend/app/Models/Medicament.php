@@ -10,7 +10,28 @@ class Medicament extends Model
 {
     /** @use HasFactory<\Database\Factories\MedicamentFactory> */
     use HasFactory;
-        public function ordonnances(){
-        return $this->hasOne(Ordonnance::class);
+
+    protected $guarded = [];
+
+    protected $casts = [
+        'prix_achat' => 'decimal:2',
+        'prix_vente' => 'decimal:2',
+        'taux_prise_en_charge' => 'decimal:2',
+        'date_expiration' => 'date',
+    ];
+
+    public function ordonnances()
+    {
+        return $this->hasMany(Ordonnance::class);
+    }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    public function venteItems()
+    {
+        return $this->hasMany(VenteItem::class);
     }
 }

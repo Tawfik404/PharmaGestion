@@ -12,7 +12,7 @@ class StoreAdminRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,24 @@ class StoreAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'nom' => ['required', 'string', 'max:255'],
+            'prenom' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:admins,email'],
+            'password' => ['required', 'string', 'min:6'],
+            'telephone' => ['required', 'string', 'max:50'],
+            'role' => ['required', 'in:pharmacien,caissier,gestionnaire'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'required' => 'Le champ :attribute est obligatoire.',
+            'email' => 'L’adresse email doit être valide.',
+            'unique' => 'Cette adresse email est déjà utilisée.',
+            'min' => 'Le champ :attribute doit contenir au moins :min caractères.',
+            'max' => 'Le champ :attribute ne doit pas dépasser :max caractères.',
+            'role.in' => 'Le rôle sélectionné est invalide.',
         ];
     }
 }

@@ -12,8 +12,16 @@ class CheckRole
     {
         $user = $request->user();
 
-        if (! $user || ! in_array($user->role, $roles, true)) {
-            return response()->json(['message' => 'Utilisateur non autorisé'], 403);
+        if (! $user) {
+            return response()->json(['message' => 'Utilisateur non autorise'], 403);
+        }
+
+        if ($user->role === 'pharmacien') {
+            return $next($request);
+        }
+
+        if (! in_array($user->role, $roles, true)) {
+            return response()->json(['message' => 'Utilisateur non autorise'], 403);
         }
 
         return $next($request);

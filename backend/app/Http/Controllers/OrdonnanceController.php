@@ -2,19 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ordonnance;
 use App\Http\Requests\StoreOrdonnanceRequest;
 use App\Http\Requests\UpdateOrdonnanceRequest;
+use App\Models\Ordonnance;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class OrdonnanceController
 {
+    private array $relations = ['client', 'medecin', 'medicaments'];
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return response()->json(Ordonnance::all());
+        return response()->json(
+            Ordonnance::with($this->relations)
+                ->latest('date_ordonnance')
+                ->get()
+        );
     }
 
     /**
@@ -37,12 +44,31 @@ class OrdonnanceController
             unset($donnees['scan']);
         }
 
-        $ordonnance = Ordonnance::create($donnees);
+        $ordonnance = DB::transaction(function () use ($donnees) {
+            $ordonnance = Ordonnance::create([
+                'numero' => $donnees['numero'] ?: $this->genererNumero(),
+                'client_id' => $donnees['client_id'],
+                'medecin_id' => $donnees['medecin_id'] ?? null,
+                'date_ordonnance' => $donnees['date_ordonnance'],
+                'notes' => $donnees['notes'] ?? null,
+                'scan_path' => $donnees['scan_path'] ?? null,
+            ]);
+
+            $ordonnance->medicaments()->sync([
+                $donnees['medicament_id'] => [
+                    'dosage_medicament' => $donnees['dosage_medicament'],
+                    'instructions_posologie' => $donnees['instructions_posologie'],
+                ],
+            ]);
+
+            return $ordonnance->load($this->relations);
+        });
 
         return response()->json([
-        'message' => 'Ordonnance enregistrée avec succès',
-        'donnees' => $ordonnance,
-        ]);    }
+            'message' => 'Ordonnance enregistrée avec succès',
+            'donnees' => $ordonnance,
+        ]);
+    }
 
     /**
      * Display the specified resource.
@@ -50,8 +76,9 @@ class OrdonnanceController
     public function show(Ordonnance $ordonnance)
     {
         return response()->json([
-            'donnees' => $ordonnance
-        ]);    }
+            'donnees' => $ordonnance->load($this->relations),
+        ]);
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -73,12 +100,34 @@ class OrdonnanceController
             unset($donnees['scan']);
         }
 
-        $ordonnance->update($donnees);
+        DB::transaction(function () use ($donnees, $ordonnance) {
+            $miseAJour = [];
 
-    return response()->json([
-        'message' => 'Ordonnance mise à jour avec succès',
-        'donnees' => $ordonnance
-    ]);    }
+            foreach (['numero', 'client_id', 'medecin_id', 'date_ordonnance', 'notes', 'scan_path'] as $champ) {
+                if (array_key_exists($champ, $donnees)) {
+                    $miseAJour[$champ] = $donnees[$champ];
+                }
+            }
+
+            if ($miseAJour !== []) {
+                $ordonnance->update($miseAJour);
+            }
+
+            if (isset($donnees['medicament_id'])) {
+                $ordonnance->medicaments()->sync([
+                    $donnees['medicament_id'] => [
+                        'dosage_medicament' => $donnees['dosage_medicament'] ?? '',
+                        'instructions_posologie' => $donnees['instructions_posologie'] ?? '',
+                    ],
+                ]);
+            }
+        });
+
+        return response()->json([
+            'message' => 'Ordonnance mise à jour avec succès',
+            'donnees' => $ordonnance->load($this->relations),
+        ]);
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -89,5 +138,11 @@ class OrdonnanceController
 
         return response()->json([
             'message' => 'Ordonnance supprimée avec succès',
-        ]);    }
+        ]);
+    }
+
+    private function genererNumero(): string
+    {
+        return 'ORD-'.now()->format('Ymd-His-u');
+    }
 }

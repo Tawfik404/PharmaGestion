@@ -16,7 +16,27 @@ class FournisseurController
      */
     public function index()
     {
-        return response()->json(Fournisseur::all());
+        return response()->json(
+            Fournisseur::query()
+                ->withCount('purchaseOrders')
+                ->withSum('purchaseOrders', 'total_amount')
+                ->withMax('purchaseOrders', 'ordered_at')
+                ->get()
+                ->map(function (Fournisseur $fournisseur) {
+                    return [
+                        'id' => $fournisseur->id,
+                        'nom' => $fournisseur->nom,
+                        'contact' => $fournisseur->contact,
+                        'telephone' => $fournisseur->telephone,
+                        'adresse' => $fournisseur->adresse,
+                        'email' => $fournisseur->email,
+                        'specialite' => $fournisseur->specialite,
+                        'commandes_total' => (int) ($fournisseur->purchase_orders_count ?? 0),
+                        'montant_total' => (float) ($fournisseur->purchase_orders_sum_total_amount ?? 0),
+                        'derniere_commande' => $fournisseur->purchase_orders_max_ordered_at,
+                    ];
+                })
+        );
     }
 
     /**
@@ -157,6 +177,7 @@ class FournisseurController
             'fournisseur' => $fournisseur,
             'nombre_commandes' => $commandes->count(),
             'montant_total' => $commandes->sum('total_amount'),
+            'derniere_commande' => optional($commandes->sortByDesc('ordered_at')->first())->ordered_at?->format('Y-m-d'),
             'periode' => [
                 'debut' => $request->get('from'),
                 'fin' => $request->get('to'),

@@ -13,7 +13,7 @@ class VenteController
 {
     public function index(Request $request)
     {
-        $requete = Vente::with(['client', 'items.medicament'])->latest('sold_at');
+        $requete = Vente::with(['client', 'admin', 'items.medicament'])->latest('sold_at');
 
         if ($request->filled('from')) {
             $requete->whereDate('sold_at', '>=', $request->date('from'));
@@ -110,7 +110,7 @@ class VenteController
                 ]);
             }
 
-            return $vente->load(['client', 'items.medicament']);
+            return $vente->load(['client', 'admin', 'items.medicament']);
         });
 
         return response()->json([
@@ -121,6 +121,6 @@ class VenteController
 
     public function show(Vente $vente)
     {
-        return response()->json(['donnees' => $vente->load(['client', 'items.medicament'])]);
+        return response()->json(['donnees' => $vente->load(['client', 'admin', 'items.medicament'])]);
     }
 }

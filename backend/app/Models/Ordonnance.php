@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Client;
+use App\Models\Medecin;
 use App\Models\Medicament;
 
 class Ordonnance extends Model
@@ -21,6 +22,11 @@ class Ordonnance extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function medecin()
+    {
+        return $this->belongsTo(Medecin::class);
     }
 
     public function medicaments()

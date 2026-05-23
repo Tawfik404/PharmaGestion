@@ -23,7 +23,9 @@ class StoreOrdonnanceRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'numero' => ['sometimes', 'nullable', 'string', 'max:255'],
             'client_id' => ['required', 'exists:clients,id'],
+            'medecin_id' => ['sometimes', 'nullable', 'exists:medecins,id'],
             'medicament_id' => ['required', 'exists:medicaments,id'],
             'date_ordonnance' => ['required', 'date'],
             'dosage_medicament' => ['required', 'string', 'max:255'],

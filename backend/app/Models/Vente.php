@@ -24,6 +24,11 @@ class Vente extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function admin()
+    {
+        return $this->belongsTo(Admin::class);
+    }
+
     public function items()
     {
         return $this->hasMany(VenteItem::class);

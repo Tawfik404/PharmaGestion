@@ -23,7 +23,9 @@ class UpdateOrdonnanceRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'numero' => ['sometimes', 'nullable', 'string', 'max:255'],
             'client_id' => ['sometimes', 'exists:clients,id'],
+            'medecin_id' => ['sometimes', 'nullable', 'exists:medecins,id'],
             'medicament_id' => ['sometimes', 'exists:medicaments,id'],
             'date_ordonnance' => ['sometimes', 'date'],
             'dosage_medicament' => ['sometimes', 'string', 'max:255'],

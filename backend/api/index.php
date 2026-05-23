@@ -2,24 +2,26 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-function formatException(\Throwable $e): array {
-    return [
-        'message'  => $e->getMessage(),
-        'class'    => get_class($e),
-        'file'     => str_replace('/var/task/user', '', $e->getFile()),
-        'line'     => $e->getLine(),
-        'trace'    => array_slice(array_map(
-            fn($t) => str_replace('/var/task/user', '', ($t['file'] ?? '?')) . ':' . ($t['line'] ?? '?'),
-            $e->getTrace()
-        ), 0, 10),
-        'previous' => $e->getPrevious() ? formatException($e->getPrevious()) : null,
-    ];
+// Vercel: only /tmp is writable
+$tmpStorage = '/tmp/laravel-storage';
+$tmpBootstrap = '/tmp/laravel-bootstrap';
+
+// Create all required writable dirs
+foreach ([
+    $tmpStorage . '/app/public',
+    $tmpStorage . '/framework/cache/data',
+    $tmpStorage . '/framework/sessions',
+    $tmpStorage . '/framework/testing',
+    $tmpStorage . '/framework/views',
+    $tmpStorage . '/logs',
+    $tmpBootstrap . '/cache',
+] as $dir) {
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
 }
 
-try {
-    require __DIR__ . '/../public/index.php';
-} catch (\Throwable $e) {
-    http_response_code(500);
-    header('Content-Type: application/json');
-    echo json_encode(formatException($e), JSON_PRETTY_PRINT);
-}
+$_ENV['APP_STORAGE_PATH']   = $tmpStorage;
+$_ENV['APP_BOOTSTRAP_PATH'] = $tmpBootstrap;
+
+require __DIR__ . '/../public/index.php';

@@ -1,32 +1,16 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-// Vercel has read-only filesystem — redirect all Laravel writes to /tmp
-$tmpStorage = '/tmp/laravel-storage';
-
-$dirs = [
-    'app/public',
-    'framework/cache/data',
-    'framework/sessions',
-    'framework/testing',
-    'framework/views',
-    'logs',
-];
-
-foreach ($dirs as $dir) {
-    $path = $tmpStorage . '/' . $dir;
-    if (!is_dir($path)) {
-        mkdir($path, 0755, true);
-    }
+try {
+    require __DIR__ . '/../public/index.php';
+} catch (\Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'message' => $e->getMessage(),
+        'class'   => get_class($e),
+        'file'    => str_replace(dirname(__DIR__), '', $e->getFile()),
+        'line'    => $e->getLine(),
+    ]);
 }
-
-// Also make bootstrap/cache writable via /tmp
-$bootstrapCache = '/tmp/laravel-bootstrap-cache';
-if (!is_dir($bootstrapCache)) {
-    mkdir($bootstrapCache, 0755, true);
-}
-
-// Tell Laravel to use these /tmp paths
-$_ENV['APP_STORAGE_PATH']    = $tmpStorage;
-$_ENV['APP_BOOTSTRAP_CACHE'] = $bootstrapCache;
-
-require __DIR__ . '/../public/index.php';

@@ -62,6 +62,7 @@ export function AuthProvider({ children }) {
 
   const hasPermission = (perm) => {
     if (!user) return false
+    if (user.role === 'pharmacien') return true
     return ROLE_PERMISSIONS[user.role]?.includes(perm)
   }
 

@@ -1,0 +1,39 @@
+.medicament-image {
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef6f1 100%);
+  border: 1px solid rgba(22, 163, 74, 0.12);
+}
+
+.medicament-image--sm {
+  width: 48px;
+  height: 48px;
+  padding: 6px;
+}
+
+.medicament-image--md {
+  width: 72px;
+  height: 72px;
+  padding: 8px;
+}
+
+.medicament-image--lg {
+  width: 120px;
+  height: 120px;
+  padding: 10px;
+}
+
+.medicament-image--xl {
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+  padding: 16px;
+}
+
+.medicament-image__img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}

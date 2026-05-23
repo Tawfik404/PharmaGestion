@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
+import { HiOutlineShoppingCart, HiOutlineMagnifyingGlass, HiOutlinePrinter, HiOutlineTrash, HiOutlineMinus, HiOutlinePlus } from 'react-icons/hi2'
+import MedicamentImage from '../components/ui/MedicamentImage'
 import Modal from '../components/ui/Modal'
 import { fetchInventory, fetchClients, processSale } from '../services/pos'
 import { normalizeMedicament } from '../services/medicaments'
 import { formatCurrency } from '../utils/helpers'
-import { HiOutlineShoppingCart, HiOutlineMagnifyingGlass, HiOutlinePrinter, HiOutlineTrash, HiOutlineMinus, HiOutlinePlus } from 'react-icons/hi2'
 import './POS.css'
 
 export default function POS() {
@@ -25,15 +26,15 @@ export default function POS() {
         setClients(clientsList)
         setLoading(false)
       })
-      .catch((err) => {
-        setError('Erreur lors du chargement des données')
+      .catch(() => {
+        setError('Erreur lors du chargement des donnees')
         setLoading(false)
       })
   }, [])
 
   const filtered = meds
-    .filter(m => m.quantiteDisponible > 0)
-    .filter(m => m.designation.toLowerCase().includes(search.toLowerCase()))
+    .filter((m) => m.quantiteDisponible > 0)
+    .filter((m) => m.designation.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'nom') return a.designation.localeCompare(b.designation)
       if (sortBy === 'ventes') return b.quantiteDisponible - a.quantiteDisponible
@@ -41,10 +42,10 @@ export default function POS() {
     })
 
   const addToCart = (med) => {
-    const existing = cart.find(c => c.id === med.id)
+    const existing = cart.find((c) => c.id === med.id)
     if (existing) {
       if (existing.qty < med.quantiteDisponible) {
-        setCart(cart.map(c => c.id === med.id ? { ...c, qty: c.qty + 1 } : c))
+        setCart(cart.map((c) => c.id === med.id ? { ...c, qty: c.qty + 1 } : c))
       }
     } else {
       setCart([...cart, { ...med, qty: 1 }])
@@ -52,22 +53,23 @@ export default function POS() {
   }
 
   const updateQty = (id, delta) => {
-    const med = meds.find(m => m.id === id)
-    setCart(cart.map(c => c.id === id ? { ...c, qty: Math.max(1, Math.min(c.qty + delta, med.quantiteDisponible)) } : c))
+    const med = meds.find((m) => m.id === id)
+    setCart(cart.map((c) => c.id === id ? { ...c, qty: Math.max(1, Math.min(c.qty + delta, med.quantiteDisponible)) } : c))
   }
 
-  const removeFromCart = (id) => setCart(cart.filter(c => c.id !== id))
+  const removeFromCart = (id) => setCart(cart.filter((c) => c.id !== id))
 
-  const subtotal = cart.reduce((s, c) => s + c.prixVente * c.qty, 0)
+  const subtotal = cart.reduce((sum, item) => sum + item.prixVente * item.qty, 0)
   const discountAmount = subtotal * (discount / 100)
   const total = subtotal - discountAmount
 
   const handleCheckout = async () => {
     if (cart.length === 0) return
+
     try {
       const salePayload = {
         client_id: selectedClient || null,
-        items: cart.map(item => ({ medicament_id: item.id, quantity: item.qty })),
+        items: cart.map((item) => ({ medicament_id: item.id, quantity: item.qty })),
         discount_rate: discount,
       }
       const response = await processSale(salePayload)
@@ -88,18 +90,18 @@ export default function POS() {
           <h1><HiOutlineShoppingCart size={22} /> Point de Vente</h1>
           <div className="pos-search">
             <HiOutlineMagnifyingGlass />
-            <input type="text" placeholder="Rechercher un produit..." value={search} onChange={e => setSearch(e.target.value)} />
+            <input type="text" placeholder="Rechercher un produit..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <div className="pos-sort">
-            <button className={sortBy === 'categorie' ? 'active' : ''} onClick={() => setSortBy('categorie')}>Catégorie</button>
+            <button className={sortBy === 'categorie' ? 'active' : ''} onClick={() => setSortBy('categorie')}>Categorie</button>
             <button className={sortBy === 'nom' ? 'active' : ''} onClick={() => setSortBy('nom')}>A-Z</button>
-            <button className={sortBy === 'ventes' ? 'active' : ''} onClick={() => setSortBy('ventes')}>Popularité</button>
+            <button className={sortBy === 'ventes' ? 'active' : ''} onClick={() => setSortBy('ventes')}>Popularite</button>
           </div>
         </div>
         <div className="pos-grid">
-          {loading ? <div>Chargement...</div> : filtered.map(med => (
+          {loading ? <div>Chargement...</div> : filtered.map((med) => (
             <div key={med.id} className="pos-product-card" onClick={() => addToCart(med)}>
-              <div className="pos-product-icon">💊</div>
+              <MedicamentImage src={med.photoUrl} alt={med.designation} size="lg" className="pos-product-image" />
               <div className="pos-product-info">
                 <h4>{med.designation}</h4>
                 <p>{med.categorie}</p>
@@ -118,20 +120,23 @@ export default function POS() {
 
         <div className="pos-cart-client">
           <label>Client</label>
-          <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)}>
+          <select value={selectedClient} onChange={(e) => setSelectedClient(e.target.value)}>
             <option value="">Client anonyme</option>
-            {clients.map(c => <option key={c.id} value={c.id}>{c.prenom} {c.nom}</option>)}
+            {clients.map((client) => <option key={client.id} value={client.id}>{client.prenom} {client.nom}</option>)}
           </select>
         </div>
 
         <div className="pos-cart-items">
           {cart.length === 0 ? (
             <div className="pos-cart-empty">Panier vide</div>
-          ) : cart.map(item => (
+          ) : cart.map((item) => (
             <div key={item.id} className="pos-cart-item">
-              <div className="pos-cart-item-info">
-                <strong>{item.designation}</strong>
-                <span>{formatCurrency(item.prixVente)}</span>
+              <div className="pos-cart-item-main">
+                <MedicamentImage src={item.photoUrl} alt={item.designation} size="sm" className="pos-cart-item-image" />
+                <div className="pos-cart-item-info">
+                  <strong>{item.designation}</strong>
+                  <span>{formatCurrency(item.prixVente)}</span>
+                </div>
               </div>
               <div className="pos-cart-item-actions">
                 <button onClick={() => updateQty(item.id, -1)}><HiOutlineMinus size={14} /></button>
@@ -144,28 +149,32 @@ export default function POS() {
         </div>
 
         <div className="pos-cart-discount">
-          <label>Réduction (%)</label>
-          <input type="number" min="0" max="100" value={discount} onChange={e => setDiscount(parseInt(e.target.value) || 0)} />
+          <label>Reduction (%)</label>
+          <input type="number" min="0" max="100" value={discount} onChange={(e) => setDiscount(parseInt(e.target.value, 10) || 0)} />
         </div>
 
         <div className="pos-cart-totals">
           <div className="pos-total-row"><span>Sous-total</span><span>{formatCurrency(subtotal)}</span></div>
-          {discount > 0 && <div className="pos-total-row discount"><span>Réduction ({discount}%)</span><span>-{formatCurrency(discountAmount)}</span></div>}
+          {discount > 0 && <div className="pos-total-row discount"><span>Reduction ({discount}%)</span><span>-{formatCurrency(discountAmount)}</span></div>}
           <div className="pos-total-row total"><span>Total</span><span>{formatCurrency(total)}</span></div>
         </div>
 
         <button className="pos-checkout" onClick={handleCheckout} disabled={cart.length === 0}>
-          Valider la vente — {formatCurrency(total)}
+          Valider la vente - {formatCurrency(total)}
         </button>
       </div>
 
-      <Modal isOpen={!!receiptModal} onClose={() => setReceiptModal(null)} title="Reçu de Vente"
-        footer={<><button className="btn btn-outline" onClick={() => setReceiptModal(null)}>Fermer</button><button className="btn btn-primary" onClick={() => { window.print() }}><HiOutlinePrinter size={16} /> Imprimer</button></>}>
+      <Modal
+        isOpen={!!receiptModal}
+        onClose={() => setReceiptModal(null)}
+        title="Recu de Vente"
+        footer={<><button className="btn btn-outline" onClick={() => setReceiptModal(null)}>Fermer</button><button className="btn btn-primary" onClick={() => { window.print() }}><HiOutlinePrinter size={16} /> Imprimer</button></>}
+      >
         {receiptModal && (
           <div className="receipt">
             <div className="receipt-header">
               <h3>Pharmacie WFS</h3>
-              <p>Réf: VTE-{receiptModal.id}</p>
+              <p>Ref: VTE-{receiptModal.id}</p>
             </div>
             <div className="receipt-info">
               <p>Date: {receiptModal.date}</p>
@@ -173,8 +182,8 @@ export default function POS() {
               <p>Caissier: {receiptModal.caissier}</p>
             </div>
             <div className="receipt-items">
-              {receiptModal.items?.map((item, i) => (
-                <div key={i} className="receipt-item">
+              {receiptModal.items?.map((item, index) => (
+                <div key={index} className="receipt-item">
                   <span>{item.designation} x{item.qty}</span>
                   <span>{formatCurrency(item.prixVente * item.qty)}</span>
                 </div>
@@ -182,7 +191,7 @@ export default function POS() {
             </div>
             <div className="receipt-totals">
               <div className="receipt-total-row"><span>Sous-total</span><span>{formatCurrency(receiptModal.total)}</span></div>
-              {receiptModal.reduction > 0 && <div className="receipt-total-row"><span>Réduction</span><span>-{formatCurrency(receiptModal.reduction)}</span></div>}
+              {receiptModal.reduction > 0 && <div className="receipt-total-row"><span>Reduction</span><span>-{formatCurrency(receiptModal.reduction)}</span></div>}
               <div className="receipt-total-row total"><span>TOTAL</span><span>{formatCurrency(receiptModal.net)}</span></div>
             </div>
           </div>

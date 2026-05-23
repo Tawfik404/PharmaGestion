@@ -1,9 +1,19 @@
-import { useState } from 'react'
-import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
-import { medications, ventes, clients, fournisseurs } from '../data/mockData'
-import { formatCurrency, exportToExcel } from '../utils/helpers'
-import { HiOutlineArrowUpTray, HiOutlineDocumentChartBar } from 'react-icons/hi2'
+import { useEffect, useMemo, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts'
+import { HiOutlineArrowUpTray, HiOutlineDocumentChartBar } from 'react-icons/hi2'
+import { useAuth } from '../context/AuthContext'
+import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
+import { formatCurrency, exportToExcel } from '../utils/helpers'
+import { listMedicaments, normalizeMedicament } from '../services/medicaments'
+import { listFournisseurs } from '../services/fournisseurs'
+import { listVentes, normalizeVente } from '../services/ventes'
+import {
+  fetchFinancialReport,
+  fetchMedicinesReport,
+  fetchSalesReport,
+  fetchStockReport,
+  fetchSuppliersReport,
+} from '../services/reports'
 import './Rapports.css'
 
 const reportTypes = [
@@ -11,47 +21,134 @@ const reportTypes = [
   { id: 'stock', label: 'Rapport de Stock' },
   { id: 'financier', label: 'Rapport Financier' },
   { id: 'fournisseurs', label: 'Rapport Fournisseurs' },
-  { id: 'medicaments', label: 'Rapport Médicaments' },
+  { id: 'medicaments', label: 'Rapport Medicaments' },
 ]
 
-const salesData = [
-  { month: 'Jan', ventes: 4200, achats: 2800 },
-  { month: 'Fév', ventes: 3800, achats: 2500 },
-  { month: 'Mar', ventes: 5100, achats: 3200 },
-  { month: 'Avr', ventes: 4700, achats: 2900 },
-  { month: 'Mai', ventes: 5500, achats: 3400 },
-]
-
-const categoryData = [
-  { name: 'Antalgique', value: 35, color: '#2563eb' },
-  { name: 'Antibiotique', value: 25, color: '#059669' },
-  { name: 'Anti-inflammatoire', value: 15, color: '#d97706' },
-  { name: 'Gastro', value: 12, color: '#dc2626' },
-  { name: 'Autres', value: 13, color: '#64748b' },
-]
+const chartColors = ['#2563eb', '#059669', '#d97706', '#dc2626', '#64748b', '#0891b2']
 
 export default function Rapports() {
+  const { hasPermission } = useAuth()
   const [activeReport, setActiveReport] = useState('ventes')
+  const [medications, setMedications] = useState([])
+  const [ventes, setVentes] = useState([])
+  const [fournisseurs, setFournisseurs] = useState([])
+  const [salesReport, setSalesReport] = useState(null)
+  const [stockReport, setStockReport] = useState(null)
+  const [financialReport, setFinancialReport] = useState(null)
+  const [suppliersReport, setSuppliersReport] = useState(null)
+  const [medicinesReport, setMedicinesReport] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const totalVentes = ventes.reduce((s, v) => s + v.net, 0)
-  const totalAchats = medications.reduce((s, m) => s + m.prixAchat * m.quantiteDisponible, 0)
-  const benefice = totalVentes - totalAchats
+  useEffect(() => {
+    chargerRapports()
+  }, [])
+
+  async function chargerRapports() {
+    if (!hasPermission('rapports')) {
+      setError('Acces non autorise a cette section.')
+      setLoading(false)
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError('')
+      const [medicamentsResponse, ventesResponse, fournisseursResponse] = await Promise.all([
+        listMedicaments(),
+        listVentes(),
+        listFournisseurs(),
+      ])
+      const reportResults = await Promise.allSettled([
+        fetchSalesReport(),
+        fetchStockReport(),
+        fetchFinancialReport(),
+        fetchSuppliersReport(),
+        fetchMedicinesReport(),
+      ])
+      const [salesResult, stockResult, financialResult, suppliersResult, medicinesResult] = reportResults
+
+      setMedications(medicamentsResponse.map(normalizeMedicament))
+      setVentes(ventesResponse.map(normalizeVente))
+      setFournisseurs(fournisseursResponse)
+      setSalesReport(salesResult.status === 'fulfilled' ? salesResult.value : null)
+      setStockReport(stockResult.status === 'fulfilled' ? stockResult.value : null)
+      setFinancialReport(financialResult.status === 'fulfilled' ? financialResult.value : null)
+      setSuppliersReport(suppliersResult.status === 'fulfilled' ? suppliersResult.value : null)
+      setMedicinesReport(medicinesResult.status === 'fulfilled' ? medicinesResult.value : null)
+
+      const reportErrors = reportResults
+        .filter((result) => result.status === 'rejected')
+        .map((result) => result.reason?.message)
+        .filter(Boolean)
+      if (reportErrors.length > 0) {
+        setError(reportErrors[0])
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const totalVentes = Number(salesReport?.montant_total_ventes ?? 0)
+  const totalAchats = Number(financialReport?.achats_fournisseurs ?? 0)
+  const benefice = Number(financialReport?.benefice_brut ?? 0)
+
+  const salesData = (salesReport?.ventes_par_jour ?? []).map((item) => ({
+    month: item.date?.slice(5) ?? '',
+    ventes: Number(item.montant_total ?? 0),
+  }))
+
+  const categoryData = useMemo(() => {
+    const grouped = medications.reduce((acc, medicament) => {
+      const key = medicament.categorie || 'Autres'
+      acc[key] = (acc[key] ?? 0) + medicament.quantiteDisponible
+      return acc
+    }, {})
+
+    return Object.entries(grouped).map(([name, value], index) => ({
+      name,
+      value,
+      color: chartColors[index % chartColors.length],
+    }))
+  }, [medications])
+
+  const supplierChartData = (suppliersReport?.par_fournisseur ?? []).map((item) => ({
+    nom: ((item.nom ?? `Fournisseur #${item.id ?? ''}`) || 'Fournisseur').slice(0, 15),
+    montant: Number(item.montant_total ?? 0),
+  }))
+
+  const medicineChartData = medications.map((medicament) => ({
+    nom: medicament.designation.slice(0, 12),
+    prix: medicament.prixVente,
+    marge: medicament.prixVente - medicament.prixAchat,
+  }))
 
   const handleExport = () => {
     if (activeReport === 'ventes') {
-      exportToExcel(ventes.map(v => ({
-        Date: v.date, Client: v.clientNom, Articles: v.articles,
-        Total: v.total, Réduction: v.reduction, Net: v.net, Caissier: v.caissier,
+      exportToExcel(ventes.map((vente) => ({
+        Date: vente.date,
+        Client: vente.clientNom,
+        Articles: vente.articles,
+        Total: vente.total,
+        Reduction: vente.reduction,
+        Net: vente.net,
+        Caissier: vente.caissier,
       })), 'rapport_ventes')
     } else if (activeReport === 'stock') {
-      exportToExcel(medications.map(m => ({
-        Médicament: m.designation, Catégorie: m.categorie,
-        'Qté Min': m.quantiteMin, 'Qté Dispo': m.quantiteDisponible,
+      exportToExcel(medications.map((medicament) => ({
+        Medicament: medicament.designation,
+        Categorie: medicament.categorie,
+        'Qte Min': medicament.quantiteMin,
+        'Qte Dispo': medicament.quantiteDisponible,
       })), 'rapport_stock')
     } else if (activeReport === 'medicaments') {
-      exportToExcel(medications.map(m => ({
-        Médicament: m.designation, 'Prix Achat': m.prixAchat, 'Prix Vente': m.prixVente,
-        Marge: (m.prixVente - m.prixAchat).toFixed(2),
+      exportToExcel(medications.map((medicament) => ({
+        Medicament: medicament.designation,
+        'Prix Achat': medicament.prixAchat,
+        'Prix Vente': medicament.prixVente,
+        Marge: (medicament.prixVente - medicament.prixAchat).toFixed(2),
       })), 'rapport_medicaments')
     }
   }
@@ -68,10 +165,12 @@ export default function Rapports() {
         </button>
       </div>
 
+      {error && <div className="login-error" style={{ marginBottom: 16 }}>{error}</div>}
+
       <div className="rapports-tabs">
-        {reportTypes.map(r => (
-          <button key={r.id} className={`rapports-tab ${activeReport === r.id ? 'active' : ''}`} onClick={() => setActiveReport(r.id)}>
-            {r.label}
+        {reportTypes.map((report) => (
+          <button key={report.id} className={`rapports-tab ${activeReport === report.id ? 'active' : ''}`} onClick={() => setActiveReport(report.id)}>
+            {report.label}
           </button>
         ))}
       </div>
@@ -79,32 +178,35 @@ export default function Rapports() {
       {activeReport === 'ventes' && (
         <div>
           <StatsGrid>
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Ventes Totales" value={formatCurrency(totalVentes)} change={12} color="green" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Nombre de Ventes" value={ventes.length} color="blue" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Moyenne/Vente" value={formatCurrency(totalVentes / ventes.length)} color="cyan" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Ventes Totales" value={formatCurrency(totalVentes)} color="green" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Nombre de Ventes" value={Number(salesReport?.nombre_ventes ?? ventes.length)} color="blue" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Moyenne/Vente" value={formatCurrency(Number(salesReport?.nombre_ventes) ? totalVentes / Number(salesReport.nombre_ventes) : 0)} color="cyan" />
           </StatsGrid>
           <div className="rapports-chart-grid">
             <div className="chart-card">
-              <h3>Évolution des Ventes</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={salesData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="ventes" fill="#2563eb" name="Ventes" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="achats" fill="#059669" name="Achats" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <h3>Evolution des Ventes</h3>
+              {salesData.length === 0 ? (
+                <div style={{ color: 'var(--text-secondary)' }}>Aucune donnee disponible.</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={salesData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="ventes" fill="#2563eb" name="Ventes" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
             <div className="chart-card">
-              <h3>Détail des Ventes Récentes</h3>
+              <h3>Detail des Ventes Recentes</h3>
               <table>
                 <thead><tr><th>Date</th><th>Client</th><th>Net</th></tr></thead>
                 <tbody>
-                  {ventes.map(v => (
-                    <tr key={v.id}><td>{v.date}</td><td>{v.clientNom}</td><td style={{ fontWeight: 600 }}>{formatCurrency(v.net)}</td></tr>
+                  {ventes.slice(0, 10).map((vente) => (
+                    <tr key={vente.id}><td>{vente.date}</td><td>{vente.clientNom}</td><td style={{ fontWeight: 600 }}>{formatCurrency(vente.net)}</td></tr>
                   ))}
                 </tbody>
               </table>
@@ -116,20 +218,24 @@ export default function Rapports() {
       {activeReport === 'stock' && (
         <div>
           <StatsGrid>
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Total Unités" value={medications.reduce((s, m) => s + m.quantiteDisponible, 0)} color="blue" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Stock Bas" value={medications.filter(m => m.quantiteDisponible < m.quantiteMin).length} color="red" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Valeur Stock" value={formatCurrency(medications.reduce((s, m) => s + m.prixVente * m.quantiteDisponible, 0))} color="green" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Total Unites" value={medications.reduce((sum, medicament) => sum + medicament.quantiteDisponible, 0)} color="blue" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Stock Bas" value={Number(stockReport?.nombre_alertes_stock_faible ?? 0)} color="red" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Valeur Stock" value={formatCurrency(Number(stockReport?.valeur_stock_vente ?? 0))} color="green" />
           </StatsGrid>
           <div className="chart-card">
-            <h3>Répartition du Stock par Catégorie</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={categoryData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, value }) => `${name}: ${value}%`}>
-                  {categoryData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <h3>Repartition du Stock par Categorie</h3>
+            {categoryData.length === 0 ? (
+              <div style={{ color: 'var(--text-secondary)' }}>Aucune donnee disponible.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie data={categoryData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                    {categoryData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       )}
@@ -137,24 +243,27 @@ export default function Rapports() {
       {activeReport === 'financier' && (
         <div>
           <StatsGrid>
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Revenus" value={formatCurrency(totalVentes)} color="green" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Dépenses (Achats)" value={formatCurrency(totalAchats)} color="orange" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Bénéfice" value={formatCurrency(benefice)} change={8} color="blue" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Marge Moyenne" value={((benefice / totalVentes) * 100).toFixed(1) + '%'} color="cyan" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Revenus" value={formatCurrency(Number(financialReport?.chiffre_affaires ?? 0))} color="green" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Depenses (Achats)" value={formatCurrency(totalAchats)} color="orange" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Benefice" value={formatCurrency(benefice)} color="blue" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Marge Moyenne" value={`${totalVentes ? ((benefice / totalVentes) * 100).toFixed(1) : '0.0'}%`} color="cyan" />
           </StatsGrid>
           <div className="chart-card">
             <h3>Suivi Financier</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={salesData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="ventes" stroke="#059669" name="Revenus" strokeWidth={2} />
-                <Line type="monotone" dataKey="achats" stroke="#dc2626" name="Dépenses" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
+            {salesData.length === 0 ? (
+              <div style={{ color: 'var(--text-secondary)' }}>Aucune donnee disponible.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={salesData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="ventes" stroke="#059669" name="Revenus" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       )}
@@ -163,20 +272,24 @@ export default function Rapports() {
         <div>
           <StatsGrid>
             <StatsCard icon={<HiOutlineDocumentChartBar />} label="Fournisseurs" value={fournisseurs.length} color="blue" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Total Commandes" value={fournisseurs.reduce((s, f) => s + f.commandesTotal, 0)} color="green" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Montant Total" value={formatCurrency(fournisseurs.reduce((s, f) => s + f.montantTotal, 0))} color="orange" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Total Commandes" value={Number(suppliersReport?.nombre_commandes ?? 0)} color="green" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Montant Total" value={formatCurrency(Number(suppliersReport?.montant_total ?? 0))} color="orange" />
           </StatsGrid>
           <div className="chart-card">
             <h3>Commandes par Fournisseur</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={fournisseurs.map(f => ({ nom: f.nom.substring(0, 15), commandes: f.commandesTotal, montant: f.montantTotal }))}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="nom" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="montant" fill="#2563eb" name="Montant (DA)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {supplierChartData.length === 0 ? (
+              <div style={{ color: 'var(--text-secondary)' }}>Aucune donnee disponible.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={supplierChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="nom" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Bar dataKey="montant" fill="#2563eb" name="Montant (DH)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       )}
@@ -184,26 +297,32 @@ export default function Rapports() {
       {activeReport === 'medicaments' && (
         <div>
           <StatsGrid>
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Total Médicaments" value={medications.length} color="blue" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Catégories" value={new Set(medications.map(m => m.categorie)).size} color="green" />
-            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Prix Moyen" value={formatCurrency(medications.reduce((s, m) => s + m.prixVente, 0) / medications.length)} color="orange" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Total Medicaments" value={medications.length} color="blue" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Alertes Stock Faible" value={(medicinesReport?.alertes_stock_faible ?? []).length} color="green" />
+            <StatsCard icon={<HiOutlineDocumentChartBar />} label="Prix Moyen" value={formatCurrency(medications.length ? medications.reduce((sum, medicament) => sum + medicament.prixVente, 0) / medications.length : 0)} color="orange" />
           </StatsGrid>
           <div className="chart-card">
-            <h3>Prix de Vente par Médicament</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={medications.map(m => ({ nom: m.designation.substring(0, 12), prix: m.prixVente, marge: m.prixVente - m.prixAchat }))}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="nom" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="prix" fill="#2563eb" name="Prix Vente" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="marge" fill="#059669" name="Marge" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <h3>Prix de Vente par Medicament</h3>
+            {medicineChartData.length === 0 ? (
+              <div style={{ color: 'var(--text-secondary)' }}>Aucune donnee disponible.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={medicineChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="nom" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="prix" fill="#2563eb" name="Prix Vente" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="marge" fill="#059669" name="Marge" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       )}
+
+      {loading && <div style={{ color: 'var(--text-secondary)' }}>Chargement des rapports...</div>}
     </div>
   )
 }

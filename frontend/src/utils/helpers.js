@@ -8,7 +8,7 @@ export function exportToExcel(data, filename) {
 }
 
 export function formatCurrency(val) {
-  return new Intl.NumberFormat('fr-DZ', { style: 'decimal', minimumFractionDigits: 2 }).format(val) + ' DA'
+  return new Intl.NumberFormat('fr-MA', { style: 'decimal', minimumFractionDigits: 2 }).format(val) + ' DH'
 }
 
 export function formatDate(dateStr) {

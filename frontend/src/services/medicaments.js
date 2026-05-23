@@ -1,4 +1,4 @@
-import { apiRequest, downloadRequest } from './api'
+import { apiRequest, downloadRequest, getApiUrl } from './api'
 
 export function listMedicaments() {
   return apiRequest('/medicament')
@@ -47,7 +47,25 @@ export function normalizeMedicament(item) {
     codeBarres: item.code_barre ?? '',
     dateExpiration: item.date_expiration ?? '',
     photo: item.photo ?? null,
+    photoUrl: resolveMedicamentPhotoUrl(item.photo),
   }
+}
+
+export function resolveMedicamentPhotoUrl(photo) {
+  if (!photo || typeof photo !== 'string') {
+    return null
+  }
+
+  if (/^https?:\/\//i.test(photo) || photo.startsWith('data:') || photo.startsWith('blob:')) {
+    return photo
+  }
+
+  if (photo.startsWith('/')) {
+    const apiOrigin = new URL(getApiUrl()).origin
+    return `${apiOrigin}${photo}`
+  }
+
+  return photo
 }
 
 export function buildMedicamentFormData(form, numero) {

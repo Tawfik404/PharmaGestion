@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
+import MedicamentImage from '../components/ui/MedicamentImage'
 import DataTable from '../components/ui/Table'
 import Modal from '../components/ui/Modal'
 import { formatCurrency, formatDate, getStockLevel } from '../utils/helpers'
-import { CATEGORIES_MED } from '../data/mockData'
+import { CATEGORIES_MED } from '../constants/medicaments'
 import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineArrowUpTray } from 'react-icons/hi2'
 import {
   buildMedicamentFormData,
@@ -181,8 +182,8 @@ export default function Medicaments() {
             <div className="form-group"><label>Categorie</label><select value={form.categorie} onChange={(e) => setForm({ ...form, categorie: e.target.value })}><option value="">Selectionner...</option>{CATEGORIES_MED.map((c) => <option key={c}>{c}</option>)}</select></div>
           </div>
           <div className="form-row">
-            <div className="form-group"><label>Prix Achat (DA)</label><input type="number" value={form.prixAchat} onChange={(e) => setForm({ ...form, prixAchat: parseFloat(e.target.value) || 0 })} /></div>
-            <div className="form-group"><label>Prix Vente (DA)</label><input type="number" value={form.prixVente} onChange={(e) => setForm({ ...form, prixVente: parseFloat(e.target.value) || 0 })} /></div>
+            <div className="form-group"><label>Prix Achat (DH)</label><input type="number" value={form.prixAchat} onChange={(e) => setForm({ ...form, prixAchat: parseFloat(e.target.value) || 0 })} /></div>
+            <div className="form-group"><label>Prix Vente (DH)</label><input type="number" value={form.prixVente} onChange={(e) => setForm({ ...form, prixVente: parseFloat(e.target.value) || 0 })} /></div>
           </div>
           <div className="form-row">
             <div className="form-group"><label>Qte Minimale</label><input type="number" value={form.quantiteMin} onChange={(e) => setForm({ ...form, quantiteMin: parseInt(e.target.value, 10) || 0 })} /></div>
@@ -208,18 +209,23 @@ export default function Medicaments() {
         footer={<><button className="btn btn-outline" onClick={() => setViewModal(null)}>Fermer</button><button className="btn btn-primary" onClick={() => { setViewModal(null); openEdit(viewModal) }}>Modifier</button></>}
       >
         {viewModal && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Numero</label><p style={{ fontWeight: 600 }}>{`MED${String(viewModal.numero).padStart(3, '0')}`}</p></div>
-            <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Categorie</label><p style={{ fontWeight: 600 }}>{viewModal.categorie}</p></div>
-            <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Prix Achat</label><p style={{ fontWeight: 600 }}>{formatCurrency(viewModal.prixAchat)}</p></div>
-            <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Prix Vente</label><p style={{ fontWeight: 600 }}>{formatCurrency(viewModal.prixVente)}</p></div>
-            <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Stock</label><p style={{ fontWeight: 600 }}>{viewModal.quantiteDisponible} / seuil: {viewModal.quantiteMin}</p></div>
-            <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Expiration</label><p style={{ fontWeight: 600 }}>{formatDate(viewModal.dateExpiration)}</p></div>
-            <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Taux PC</label><p style={{ fontWeight: 600 }}>{viewModal.tauxPriseEnCharge}%</p></div>
-            <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Code-barres</label><p style={{ fontWeight: 600 }}>{viewModal.codeBarres}</p></div>
-            <div style={{ gridColumn: 'span 2' }}><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Utilisations</label><p>{viewModal.utilisations}</p></div>
-            <div style={{ gridColumn: 'span 2' }}><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Contre-indications</label><p>{viewModal.contreIndications}</p></div>
-            <div style={{ gridColumn: 'span 2' }}><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Effets secondaires</label><p>{viewModal.effetsSecondaires}</p></div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, alignItems: 'start' }}>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <MedicamentImage src={viewModal.photoUrl} alt={viewModal.designation} size="xl" />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
+              <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Numero</label><p style={{ fontWeight: 600 }}>{`MED${String(viewModal.numero).padStart(3, '0')}`}</p></div>
+              <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Categorie</label><p style={{ fontWeight: 600 }}>{viewModal.categorie}</p></div>
+              <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Prix Achat</label><p style={{ fontWeight: 600 }}>{formatCurrency(viewModal.prixAchat)}</p></div>
+              <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Prix Vente</label><p style={{ fontWeight: 600 }}>{formatCurrency(viewModal.prixVente)}</p></div>
+              <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Stock</label><p style={{ fontWeight: 600 }}>{viewModal.quantiteDisponible} / seuil: {viewModal.quantiteMin}</p></div>
+              <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Expiration</label><p style={{ fontWeight: 600 }}>{formatDate(viewModal.dateExpiration)}</p></div>
+              <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Taux PC</label><p style={{ fontWeight: 600 }}>{viewModal.tauxPriseEnCharge}%</p></div>
+              <div><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Code-barres</label><p style={{ fontWeight: 600 }}>{viewModal.codeBarres}</p></div>
+              <div style={{ gridColumn: 'span 2' }}><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Utilisations</label><p>{viewModal.utilisations}</p></div>
+              <div style={{ gridColumn: 'span 2' }}><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Contre-indications</label><p>{viewModal.contreIndications}</p></div>
+              <div style={{ gridColumn: 'span 2' }}><label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Effets secondaires</label><p>{viewModal.effetsSecondaires}</p></div>
+            </div>
           </div>
         )}
       </Modal>

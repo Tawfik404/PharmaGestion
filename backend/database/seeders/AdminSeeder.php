@@ -14,30 +14,30 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-       Admin::create([
-        'nom'=>'abouhmad',
-        'prenom'=>'tawfik0',
-        'email'=>'tawfik@gmail.com',
-        'password'=>Hash::make("tawfik"),
+
+#test accounts:
+               Admin::create([
+        'nom'=>'tawfik',
+        'prenom'=>'pharmacien',
+        'email'=>'pharmacien@gmail.com',
+        'password'=>Hash::make("pharmacien"),
         'telephone'=>"06123456789",
         'role'=>"pharmacien",
        ]);
-
         Admin::create([
-        'nom'=>'abouhmad',
-        'prenom'=>'tawfik1',
-        'email'=>'tawfik1@gmail.com',
-        'password'=>Hash::make("tawfik1"),
+        'nom'=>'Ehsan',
+        'prenom'=>'caissier',
+        'email'=>'caissier@gmail.com',
+        'password'=>Hash::make("caissier"),
         'telephone'=>"06123456789",
         'role'=>"caissier",
        ]);
-
-
+       
         Admin::create([
-        'nom'=>'abouhmad',
-        'prenom'=>'tawfik2',
-        'email'=>'tawfik2@gmail.com',
-        'password'=>Hash::make("tawfik2"),
+        'nom'=>'tawfik',
+        'prenom'=>'gestionnaire',
+        'email'=>'gestionnaire@gmail.com',
+        'password'=>Hash::make("gestionnaire"),
         'telephone'=>"06123456789",
         'role'=>"gestionnaire",
        ]);

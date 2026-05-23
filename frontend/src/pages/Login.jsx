@@ -48,11 +48,7 @@ export default function Login() {
           <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '11px 16px' }} disabled={submitting}>
             {submitting ? 'Connexion...' : 'Se connecter'}
           </button>
-          <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>
-            <p><strong>Comptes de test:</strong></p>
-            <p>Utilisateur initialise: tawfik@gmail.com</p>
-            <p style={{ marginTop: 4 }}>Mot de passe: tawfik</p>
-          </div>
+
         </form>
       </div>
     </div>

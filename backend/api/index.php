@@ -1,12 +1,19 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+
+// Handle CORS preflight before Laravel touches anything
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+    header('Access-Control-Max-Age: 86400');
+    http_response_code(204);
+    exit();
+}
 
 // Vercel: only /tmp is writable
-$tmpStorage = '/tmp/laravel-storage';
+$tmpStorage  = '/tmp/laravel-storage';
 $tmpBootstrap = '/tmp/laravel-bootstrap';
 
-// Create all required writable dirs
 foreach ([
     $tmpStorage . '/app/public',
     $tmpStorage . '/framework/cache/data',

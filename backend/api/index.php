@@ -12,5 +12,12 @@ try {
         'class'   => get_class($e),
         'file'    => str_replace(dirname(__DIR__), '', $e->getFile()),
         'line'    => $e->getLine(),
+        'trace'   => array_slice(
+            array_map(
+                fn($t) => ($t['file'] ?? '?') . ':' . ($t['line'] ?? '?'),
+                $e->getTrace()
+            ),
+            0, 10  // first 10 frames only
+        ),
     ]);
 }

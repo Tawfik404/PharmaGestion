@@ -7,6 +7,10 @@
   },
   "routes": [
     {
+      "src": "/debug-check",
+      "dest": "/public/debug.php"
+    },
+    {
       "src": "/(.*)",
       "dest": "/api/index.php"
     }

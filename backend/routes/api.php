@@ -65,3 +65,9 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok'
+    ]);
+});

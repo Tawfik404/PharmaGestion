@@ -13,7 +13,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Vercel: only /tmp is writable
 $tmpStorage  = '/tmp/laravel-storage';
 $tmpBootstrap = '/tmp/laravel-bootstrap';
+$realBootstrap = __DIR__ . '/../bootstrap/cache';
+$tmpCache      = $tmpBootstrap . '/cache';
 
+foreach (['packages.php', 'services.php'] as $file) {
+    $src  = $realBootstrap . '/' . $file;
+    $dest = $tmpCache . '/' . $file;
+    if (file_exists($src) && !file_exists($dest)) {
+        copy($src, $dest);
+    }
+}
 foreach ([
     $tmpStorage . '/app/public',
     $tmpStorage . '/framework/cache/data',

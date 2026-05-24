@@ -43,4 +43,4 @@ function formatException(\Throwable $e): array {
     ];
 }
 
-require __DIR__ . '/public/index.php';
+require __DIR__ . '/../public/index.php';

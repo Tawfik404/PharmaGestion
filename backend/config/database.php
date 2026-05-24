@@ -59,10 +59,11 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-'options' => extension_loaded('pdo_mysql') ? array_filter([
-    (defined('Pdo\Mysql::ATTR_SSL_CA') ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => '/etc/ssl/certs/ca-certificates.crt',
-    (defined('Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT') ? Mysql::ATTR_SSL_VERIFY_SERVER_CERT : PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT) => false,
-]) : [],
+'options' => extension_loaded('pdo_mysql') ? [
+    (defined('Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT') 
+        ? Mysql::ATTR_SSL_VERIFY_SERVER_CERT 
+        : PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT) => false,
+] : [],
         ],
 
         'mariadb' => [

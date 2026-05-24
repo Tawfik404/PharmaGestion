@@ -11,17 +11,84 @@ class FournisseurFactory extends Factory
 
     public function definition(): array
     {
-        $fournisseurs = [
-            ['nom' => 'SARPHARM Distribution', 'contact' => 'Rabah Mansouri', 'telephone' => '021634567', 'email' => 'contact@sarpharm.dz', 'adresse' => 'Zone Industrielle Oued Smar, Alger', 'specialite' => 'Généraliste'],
-            ['nom' => 'PHARMA-ALGERIE', 'contact' => 'Saliha Boumediene', 'telephone' => '031890123', 'email' => 'info@pharma-alg.dz', 'adresse' => 'Rue des Frères Abbas, Blida', 'specialite' => 'Antibiotiques'],
-            ['nom' => 'MEDIPHARMA', 'contact' => 'Karim Allouache', 'telephone' => '041234567', 'email' => 'cmd@medipharma.dz', 'adresse' => 'Cité 1000 logements, Oran', 'specialite' => 'Spécialités'],
-            ['nom' => 'ALGER PHARMA', 'contact' => 'Nesrine Hamidouche', 'telephone' => '021567890', 'email' => 'vente@algerpharma.dz', 'adresse' => 'Bab Ezzouar, Alger', 'specialite' => 'Généraliste'],
-            ['nom' => 'BIOMEDICAL SPA', 'contact' => 'Amine Belkacem', 'telephone' => '025678901', 'email' => 'contact@biomedical.dz', 'adresse' => 'Route de l\'Université, Tizi Ouzou', 'specialite' => 'Pédiatrie'],
-            ['nom' => 'PHARMADZ', 'contact' => 'Fatima Zohra', 'telephone' => '038765432', 'email' => 'info@pharmadz.dz', 'adresse' => 'Avenue Colonel Lotfi, Constantine', 'specialite' => 'Cardiologie'],
-        ];
 
-        $index = $this->faker->unique()->numberBetween(0, count($fournisseurs) - 1);
+$fournisseurs = [
+    [
+        'nom' => 'PharmaPlus Distribution',
+        'contact' => 'Youssef El Fassi',
+        'telephone' => '0522334455',
+        'email' => 'contact@pharmaplus.ma',
+        'adresse' => 'Zone Industrielle Aïn Sebaâ, Casablanca',
+        'specialite' => 'Médicaments généralistes'
+    ],
 
-        return $fournisseurs[$index];
+    [
+        'nom' => 'Atlas Médical',
+        'contact' => 'Salma Bennani',
+        'telephone' => '0537278910',
+        'email' => 'commercial@atlasmedical.ma',
+        'adresse' => 'Avenue Mohammed VI, Rabat',
+        'specialite' => 'Antibiotiques'
+    ],
+
+    [
+        'nom' => 'MediSanté Maroc',
+        'contact' => 'Karim Amrani',
+        'telephone' => '0524442211',
+        'email' => 'commande@medisante.ma',
+        'adresse' => 'Boulevard Abdelkrim El Khattabi, Marrakech',
+        'specialite' => 'Produits hospitaliers'
+    ],
+
+    [
+        'nom' => 'Saha Pharma',
+        'contact' => 'Nadia El Alaoui',
+        'telephone' => '0539945678',
+        'email' => 'info@sahapharma.ma',
+        'adresse' => 'Quartier Agdal, Rabat',
+        'specialite' => 'Parapharmacie'
+    ],
+
+    [
+        'nom' => 'Nordic Pharma Maroc',
+        'contact' => 'Hamza Benkirane',
+        'telephone' => '0535401122',
+        'email' => 'support@nordicpharma.ma',
+        'adresse' => 'Route de Tétouan, Tanger',
+        'specialite' => 'Pédiatrie'
+    ],
+
+    [
+        'nom' => 'BioCare Distribution',
+        'contact' => 'Fatima Zahra Lahlou',
+        'telephone' => '0522887766',
+        'email' => 'contact@biocare.ma',
+        'adresse' => 'Bd Hassan II, Casablanca',
+        'specialite' => 'Cardiologie'
+    ],
+
+    [
+        'nom' => 'Pharma Sud',
+        'contact' => 'Rachid El Idrissi',
+        'telephone' => '0528823344',
+        'email' => 'vente@pharmasud.ma',
+        'adresse' => 'Avenue Hassan Ier, Agadir',
+        'specialite' => 'Dermatologie'
+    ],
+
+    [
+        'nom' => 'MedLink Santé',
+        'contact' => 'Imane Cherkaoui',
+        'telephone' => '0535689988',
+        'email' => 'contact@medlink.ma',
+        'adresse' => 'Centre Ville, Meknès',
+        'specialite' => 'Diabétologie'
+    ],
+];
+
+
+
+return $fournisseurs[array_rand($fournisseurs)];
+
     }
 }

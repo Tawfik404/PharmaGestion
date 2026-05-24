@@ -44,7 +44,7 @@ function formatException(\Throwable $e): array {
 }
 
 try {
-    require __DIR__ . '/../public/index.php';
+require __DIR__ . '/public/index.php';
 } catch (\Throwable $e) {
     http_response_code(500);
     header('Content-Type: application/json');

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { HiOutlineShoppingCart, HiOutlineMagnifyingGlass, HiOutlinePrinter, HiOutlineTrash, HiOutlineMinus, HiOutlinePlus } from 'react-icons/hi2'
+import { HiOutlineShoppingCart, HiOutlineMagnifyingGlass, HiOutlinePrinter, HiOutlineTrash, HiOutlineMinus, HiOutlinePlus, HiChevronDown } from 'react-icons/hi2'
 import MedicamentImage from '../components/ui/MedicamentImage'
 import Modal from '../components/ui/Modal'
 import { fetchInventory, fetchClients, processSale } from '../services/pos'
@@ -18,6 +18,7 @@ export default function POS() {
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isCartOpen, setIsCartOpen] = useState(false)
 
   useEffect(() => {
     Promise.all([fetchInventory(), fetchClients()])
@@ -112,56 +113,61 @@ export default function POS() {
         </div>
       </div>
 
-      <div className="pos-cart">
-        <div className="pos-cart-header">
-          <h2>Panier</h2>
-          <span>{cart.length} article(s)</span>
+      <div className={`pos-cart ${isCartOpen ? 'open' : ''}`}>
+        <div className="pos-cart-header" onClick={() => setIsCartOpen(!isCartOpen)}>
+          <div>
+            <h2>Panier</h2>
+            <span>{cart.length} article(s)</span>
+          </div>
+          <HiChevronDown className={`pos-cart-toggle ${isCartOpen ? 'rotate' : ''}`} />
         </div>
 
-        <div className="pos-cart-client">
-          <label>Client</label>
-          <select value={selectedClient} onChange={(e) => setSelectedClient(e.target.value)}>
-            <option value="">Client anonyme</option>
-            {clients.map((client) => <option key={client.id} value={client.id}>{client.prenom} {client.nom}</option>)}
-          </select>
-        </div>
+        <div className="pos-cart-content">
+          <div className="pos-cart-client">
+            <label>Client</label>
+            <select value={selectedClient} onChange={(e) => setSelectedClient(e.target.value)}>
+              <option value="">Client anonyme</option>
+              {clients.map((client) => <option key={client.id} value={client.id}>{client.prenom} {client.nom}</option>)}
+            </select>
+          </div>
 
-        <div className="pos-cart-items">
-          {cart.length === 0 ? (
-            <div className="pos-cart-empty">Panier vide</div>
-          ) : cart.map((item) => (
-            <div key={item.id} className="pos-cart-item">
-              <div className="pos-cart-item-main">
-                <MedicamentImage src={item.photoUrl} alt={item.designation} size="sm" className="pos-cart-item-image" />
-                <div className="pos-cart-item-info">
-                  <strong>{item.designation}</strong>
-                  <span>{formatCurrency(item.prixVente)}</span>
+          <div className="pos-cart-items">
+            {cart.length === 0 ? (
+              <div className="pos-cart-empty">Panier vide</div>
+            ) : cart.map((item) => (
+              <div key={item.id} className="pos-cart-item">
+                <div className="pos-cart-item-main">
+                  <MedicamentImage src={item.photoUrl} alt={item.designation} size="sm" className="pos-cart-item-image" />
+                  <div className="pos-cart-item-info">
+                    <strong>{item.designation}</strong>
+                    <span>{formatCurrency(item.prixVente)}</span>
+                  </div>
+                </div>
+                <div className="pos-cart-item-actions">
+                  <button onClick={() => updateQty(item.id, -1)}><HiOutlineMinus size={14} /></button>
+                  <span>{item.qty}</span>
+                  <button onClick={() => updateQty(item.id, 1)}><HiOutlinePlus size={14} /></button>
+                  <button className="remove" onClick={() => removeFromCart(item.id)}><HiOutlineTrash size={14} /></button>
                 </div>
               </div>
-              <div className="pos-cart-item-actions">
-                <button onClick={() => updateQty(item.id, -1)}><HiOutlineMinus size={14} /></button>
-                <span>{item.qty}</span>
-                <button onClick={() => updateQty(item.id, 1)}><HiOutlinePlus size={14} /></button>
-                <button className="remove" onClick={() => removeFromCart(item.id)}><HiOutlineTrash size={14} /></button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="pos-cart-discount">
-          <label>Reduction (%)</label>
-          <input type="number" min="0" max="100" value={discount} onChange={(e) => setDiscount(parseInt(e.target.value, 10) || 0)} />
-        </div>
+          <div className="pos-cart-discount">
+            <label>Reduction (%)</label>
+            <input type="number" min="0" max="100" value={discount} onChange={(e) => setDiscount(parseInt(e.target.value, 10) || 0)} />
+          </div>
 
-        <div className="pos-cart-totals">
-          <div className="pos-total-row"><span>Sous-total</span><span>{formatCurrency(subtotal)}</span></div>
-          {discount > 0 && <div className="pos-total-row discount"><span>Reduction ({discount}%)</span><span>-{formatCurrency(discountAmount)}</span></div>}
-          <div className="pos-total-row total"><span>Total</span><span>{formatCurrency(total)}</span></div>
-        </div>
+          <div className="pos-cart-totals">
+            <div className="pos-total-row"><span>Sous-total</span><span>{formatCurrency(subtotal)}</span></div>
+            {discount > 0 && <div className="pos-total-row discount"><span>Reduction ({discount}%)</span><span>-{formatCurrency(discountAmount)}</span></div>}
+            <div className="pos-total-row total"><span>Total</span><span>{formatCurrency(total)}</span></div>
+          </div>
 
-        <button className="pos-checkout" onClick={handleCheckout} disabled={cart.length === 0}>
-          Valider la vente - {formatCurrency(total)}
-        </button>
+          <button className="pos-checkout" onClick={handleCheckout} disabled={cart.length === 0}>
+            Valider la vente - {formatCurrency(total)}
+          </button>
+        </div>
       </div>
 
       <Modal

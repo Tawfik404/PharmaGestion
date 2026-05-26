@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Sidebar from './components/layout/Sidebar'
@@ -13,12 +14,12 @@ import Fournisseurs from './pages/Fournisseurs'
 import Rapports from './pages/Rapports'
 import Utilisateurs from './pages/Utilisateurs'
 
-function PrivateLayout({ children }) {
+function PrivateLayout({ children, isSidebarOpen, toggleSidebar }) {
   return (
-    <div className="app-layout">
-      <Sidebar />
+    <div className={`app-layout ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="main-content">
-        <Header />
+        <Header toggleSidebar={toggleSidebar} />
         <div className="page-content">{children}</div>
       </div>
     </div>
@@ -27,6 +28,9 @@ function PrivateLayout({ children }) {
 
 function App() {
   const { user, loading } = useAuth()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
 
   if (loading) {
     return null
@@ -42,7 +46,7 @@ function App() {
   }
 
   return (
-    <PrivateLayout>
+    <PrivateLayout isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar}>
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/medicaments" element={<Medicaments />} />

@@ -24,6 +24,12 @@
 
 .rapports-chart-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .rapports-chart-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }

@@ -1,6 +1,6 @@
 .header {
   background: var(--bg-card);
-  padding: 12px 24px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -8,6 +8,33 @@
   position: sticky;
   top: 0;
   z-index: 50;
+}
+
+@media (min-width: 768px) {
+  .header {
+    padding: 12px 24px;
+  }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 4px;
+}
+
+@media (min-width: 1024px) {
+  .header-menu-btn {
+    display: none;
+  }
 }
 
 .header-search {
@@ -28,10 +55,16 @@
   padding: 8px 12px 8px 36px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  width: 320px;
+  width: 180px;
   font-size: 14px;
   background: var(--bg-main);
   transition: border-color 0.2s;
+}
+
+@media (min-width: 768px) {
+  .header-search input {
+    width: 320px;
+  }
 }
 
 .header-search input:focus {
@@ -42,7 +75,7 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .header-icon-btn {

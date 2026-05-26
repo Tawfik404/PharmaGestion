@@ -27,7 +27,7 @@ const navItems = [
   ]},
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, toggleSidebar }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout, hasPermission } = useAuth()
@@ -35,44 +35,47 @@ export default function Sidebar() {
   const roleLabels = { pharmacien: 'Pharmacien', caissier: 'Caissier', gestionnaire: 'Gestionnaire' }
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-logo">
-        <div className="sidebar-logo-icon">⚕</div>
-        <div>
-          <h2>Pharmacie WFS</h2>
-          <span>Système de Gestion</span>
-        </div>
-      </div>
-      <nav className="sidebar-nav">
-        {navItems.map((section, i) => {
-          const items = section.items.filter(item => !item.perm || hasPermission(item.perm))
-          if (items.length === 0) return null
-          return (
-            <div className="sidebar-section" key={i}>
-              <div className="sidebar-section-title">{section.label}</div>
-              {items.map(item => (
-                <Link key={item.path} to={item.path}>
-                  <button className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}>
-                    {item.icon}{item.label}
-                  </button>
-                </Link>
-              ))}
-            </div>
-          )
-        })}
-      </nav>
-      <div className="sidebar-footer">
-        <div className="sidebar-user">
-          <div className="sidebar-avatar">{user?.name?.charAt(0)}</div>
-          <div className="sidebar-user-info">
-            <div className="sidebar-user-name">{user?.name}</div>
-            <div className="sidebar-user-role">{roleLabels[user?.role]}</div>
+    <>
+      <div className={`sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={toggleSidebar}></div>
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <div className="sidebar-logo">
+          <div className="sidebar-logo-icon">⚕</div>
+          <div>
+            <h2>Pharmacie WFS</h2>
+            <span>Système de Gestion</span>
           </div>
-          <button className="btn-icon" style={{ color: 'var(--text-sidebar)' }} onClick={async () => { await logout(); navigate('/login') }}>
-            <HiArrowLeftOnRectangle size={18} />
-          </button>
         </div>
-      </div>
-    </aside>
+        <nav className="sidebar-nav">
+          {navItems.map((section, i) => {
+            const items = section.items.filter(item => !item.perm || hasPermission(item.perm))
+            if (items.length === 0) return null
+            return (
+              <div className="sidebar-section" key={i}>
+                <div className="sidebar-section-title">{section.label}</div>
+                {items.map(item => (
+                  <Link key={item.path} to={item.path} onClick={toggleSidebar}>
+                    <button className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}>
+                      {item.icon}{item.label}
+                    </button>
+                  </Link>
+                ))}
+              </div>
+            )
+          })}
+        </nav>
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="sidebar-avatar">{user?.name?.charAt(0)}</div>
+            <div className="sidebar-user-info">
+              <div className="sidebar-user-name">{user?.name}</div>
+              <div className="sidebar-user-role">{roleLabels[user?.role]}</div>
+            </div>
+            <button className="btn-icon" style={{ color: 'var(--text-sidebar)' }} onClick={async () => { await logout(); navigate('/login') }}>
+              <HiArrowLeftOnRectangle size={18} />
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
   )
 }

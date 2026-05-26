@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react'
 import MedicamentImage from '../components/ui/MedicamentImage'
 import DataTable from '../components/ui/Table'
 import Modal from '../components/ui/Modal'
-import { formatCurrency, formatDate, getStockLevel } from '../utils/helpers'
+import { formatCurrency, formatDate, getStockLevel, exportToExcel } from '../utils/helpers'
 import { CATEGORIES_MED } from '../constants/medicaments'
 import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineArrowUpTray } from 'react-icons/hi2'
 import {
   buildMedicamentFormData,
   createMedicament,
   deleteMedicament,
-  exportMedicaments,
   listMedicaments,
   normalizeMedicament,
   updateMedicament,
@@ -112,13 +111,18 @@ export default function Medicaments() {
     }
   }
 
-  const handleExport = async () => {
-    try {
-      setError('')
-      await exportMedicaments()
-    } catch (err) {
-      setError(err.message)
-    }
+  const handleExport = () => {
+    exportToExcel(meds.map((m) => ({
+      Numero: `MED${String(m.numero).padStart(3, '0')}`,
+      Designation: m.designation,
+      Categorie: m.categorie,
+      'Prix Achat': m.prixAchat,
+      'Prix Vente': m.prixVente,
+      'Qte Disponible': m.quantiteDisponible,
+      'Qte Minimale': m.quantiteMin,
+      'Date Expiration': m.dateExpiration,
+      'Code Barres': m.codeBarres,
+    })), 'medicaments')
   }
 
   const columns = [

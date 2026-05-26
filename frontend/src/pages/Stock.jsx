@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import DataTable from '../components/ui/Table'
 import Modal from '../components/ui/Modal'
 import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
-import { formatCurrency, getStockLevel } from '../utils/helpers'
+import { formatCurrency, getStockLevel, exportToExcel } from '../utils/helpers'
 import { HiOutlineExclamationTriangle, HiOutlineCheckCircle, HiOutlineArchiveBox, HiOutlineArrowUpTray } from 'react-icons/hi2'
-import { exportStock, listMedicamentsLowStock, listStockMovements, normalizeLowStock, normalizeStockMovement, replenishStock } from '../services/stock'
+import { listMedicamentsLowStock, listStockMovements, normalizeLowStock, normalizeStockMovement, replenishStock } from '../services/stock'
 import { listMedicaments, normalizeMedicament } from '../services/medicaments'
 
 export default function Stock() {
@@ -67,13 +67,15 @@ export default function Stock() {
     }
   }
 
-  const handleExportStock = async () => {
-    try {
-      setError('')
-      await exportStock()
-    } catch (err) {
-      setError(err.message)
-    }
+  const handleExportStock = () => {
+    exportToExcel(medications.map((m) => ({
+      Numero: `MED${String(m.numero).padStart(3, '0')}`,
+      Designation: m.designation,
+      'Qte Min': m.quantiteMin,
+      'Qte Disponible': m.quantiteDisponible,
+      Statut: getStockLevel(m.quantiteDisponible, m.quantiteMin).label,
+      Expiration: m.dateExpiration,
+    })), 'stock')
   }
 
   const stockColumns = [

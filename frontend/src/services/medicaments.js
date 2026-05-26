@@ -26,10 +26,6 @@ export function deleteMedicament(id) {
   })
 }
 
-export function exportMedicaments() {
-  return downloadRequest('/medicament/export/excel', 'medicaments.xlsx')
-}
-
 export function normalizeMedicament(item) {
   return {
     id: item.id,

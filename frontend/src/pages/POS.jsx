@@ -4,7 +4,7 @@ import MedicamentImage from '../components/ui/MedicamentImage'
 import Modal from '../components/ui/Modal'
 import { fetchInventory, fetchClients, processSale } from '../services/pos'
 import { normalizeMedicament } from '../services/medicaments'
-import { formatCurrency } from '../utils/helpers'
+import { formatCurrency, formatDate } from '../utils/helpers'
 import './POS.css'
 
 export default function POS() {
@@ -183,22 +183,22 @@ export default function POS() {
               <p>Ref: VTE-{receiptModal.id}</p>
             </div>
             <div className="receipt-info">
-              <p>Date: {receiptModal.date}</p>
-              <p>Client: {receiptModal.clientNom}</p>
-              <p>Caissier: {receiptModal.caissier}</p>
+              <p>Date: {formatDate(receiptModal.sold_at)}</p>
+              <p>Client: {receiptModal.client ? `${receiptModal.client.prenom} ${receiptModal.client.nom}` : (receiptModal.customer_name || 'Client anonyme')}</p>
+              <p>Caissier: {receiptModal.admin ? `${receiptModal.admin.prenom} ${receiptModal.admin.nom}` : 'Système'}</p>
             </div>
             <div className="receipt-items">
               {receiptModal.items?.map((item, index) => (
                 <div key={index} className="receipt-item">
-                  <span>{item.designation} x{item.qty}</span>
-                  <span>{formatCurrency(item.prixVente * item.qty)}</span>
+                  <span>{item.medicament?.designation || 'Produit inconnu'} x{item.quantity}</span>
+                  <span>{formatCurrency(item.unit_sale_price * item.quantity)}</span>
                 </div>
               ))}
             </div>
             <div className="receipt-totals">
-              <div className="receipt-total-row"><span>Sous-total</span><span>{formatCurrency(receiptModal.total)}</span></div>
-              {receiptModal.reduction > 0 && <div className="receipt-total-row"><span>Reduction</span><span>-{formatCurrency(receiptModal.reduction)}</span></div>}
-              <div className="receipt-total-row total"><span>TOTAL</span><span>{formatCurrency(receiptModal.net)}</span></div>
+              <div className="receipt-total-row"><span>Sous-total</span><span>{formatCurrency(receiptModal.subtotal)}</span></div>
+              {receiptModal.discount_amount > 0 && <div className="receipt-total-row"><span>Reduction</span><span>-{formatCurrency(receiptModal.discount_amount)}</span></div>}
+              <div className="receipt-total-row total"><span>TOTAL</span><span>{formatCurrency(receiptModal.total)}</span></div>
             </div>
           </div>
         )}

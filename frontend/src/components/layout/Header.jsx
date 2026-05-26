@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { HiOutlineBell, HiOutlineMagnifyingGlass, HiOutlineArrowRightOnRectangle, HiBars3 } from 'react-icons/hi2'
+import { HiOutlineMagnifyingGlass, HiOutlineArrowRightOnRectangle, HiBars3 } from 'react-icons/hi2'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import './Header.css'
 
 export default function Header({ toggleSidebar }) {
   const [search, setSearch] = useState('')
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = async () => {

@@ -135,21 +135,21 @@ export default function Rapports() {
         Reduction: vente.reduction,
         Net: vente.net,
         Caissier: vente.caissier,
-      })), 'rapport_ventes')
+      })), 'ventes')
     } else if (activeReport === 'stock') {
       exportToExcel(medications.map((medicament) => ({
         Medicament: medicament.designation,
         Categorie: medicament.categorie,
         'Qte Min': medicament.quantiteMin,
         'Qte Dispo': medicament.quantiteDisponible,
-      })), 'rapport_stock')
+      })), 'stock')
     } else if (activeReport === 'medicaments') {
       exportToExcel(medications.map((medicament) => ({
         Medicament: medicament.designation,
         'Prix Achat': medicament.prixAchat,
         'Prix Vente': medicament.prixVente,
         Marge: (medicament.prixVente - medicament.prixAchat).toFixed(2),
-      })), 'rapport_medicaments')
+      })), 'medicaments')
     }
   }
 

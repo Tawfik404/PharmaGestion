@@ -19,10 +19,6 @@ export function replenishStock(medicamentId, payload) {
   })
 }
 
-export function exportStock() {
-  return downloadRequest('/stock/export/excel', 'stock_pharmacie.xlsx')
-}
-
 export function normalizeStockMovement(item) {
   return {
     id: item.id,

@@ -92,13 +92,13 @@ npm run preview
 
 | Rôle | Email | Mot de passe | Accès |
 |------|-------|-------------|-------|
-| **Pharmacien** | `ahmed@pharmacie.dz` | `*` | Accès complet à tous les modules |
+| **Gestionnaire** | `mohamed@pharmacie.dz` | `*` | Accès complet à tous les modules |
 | **Caissier** | `fatima@pharmacie.dz` | `*` | Dashboard, Point de Vente, Clients |
-| **Gestionnaire** | `mohamed@pharmacie.dz` | `*` | Dashboard, Médicaments, Stock, Fournisseurs, Rapports |
+| **Pharmacien** | `ahmed@pharmacie.dz` | `*` | Dashboard, Médicaments, Stock, Fournisseurs, Rapports |
 
 ### Détail des accès par rôle
 
-| Module | Pharmacien | Caissier | Gestionnaire |
+| Module | Gestionnaire | Caissier | Pharmacien |
 |--------|:----------:|:--------:|:------------:|
 | Tableau de bord | ✅ | ✅ | ✅ |
 | Médicaments | ✅ | ❌ | ✅ |
@@ -231,7 +231,7 @@ pharmacy-frontend/
 
 ## Rôles et permissions
 
-### Pharmacien (accès complet)
+### Gestionnaire (accès complet)
 - Tous les modules du système
 - Gestion complète des médicaments, stocks, ordonnances
 - Point de vente, clients, fournisseurs
@@ -242,7 +242,7 @@ pharmacy-frontend/
 - Point de vente (vente, panier, reçus)
 - Gestion des clients (consultation)
 
-### Gestionnaire (accès intermédiaire)
+### Pharmacien (accès intermédiaire)
 - Tableau de bord (lecture seule)
 - Gestion des médicaments
 - Gestion des stocks

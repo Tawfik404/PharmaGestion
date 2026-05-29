@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/fournisseur/{fournisseur}/stats', [FournisseurController::class, 'stats'])
         ->middleware('role:pharmacien,gestionnaire');
 
-    Route::prefix('reports')->middleware('role:gestionnaire')->group(function () {
+    Route::prefix('reports')->middleware('role:pharmacien,gestionnaire')->group(function () {
         Route::get('/sales', [ReportController::class, 'sales']);
         Route::get('/stock', [ReportController::class, 'stock']);
         Route::get('/financial', [ReportController::class, 'financial']);
@@ -56,13 +56,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     Route::apiResource('admin', AdminController::class)->middleware('role:gestionnaire');
-    Route::apiResource('client', ClientController::class)->middleware('role:caissier,pharmacien,gestionnaire');
-    Route::apiResource('fournisseur', FournisseurController::class)->middleware('role:pharmacien,gestionnaire');
-    Route::apiResource('medecin', MedecinController::class)->middleware('role:pharmacien,gestionnaire');
-    Route::apiResource('medicament', MedicamentController::class)->middleware('role:caissier,pharmacien,gestionnaire');
-    Route::apiResource('ordonnance', OrdonnanceController::class)->middleware('role:pharmacien,gestionnaire');
+    Route::apiResource('client', ClientController::class)->middleware('role:caissier,gestionnaire,pharmacien');
+    Route::apiResource('fournisseur', FournisseurController::class)->middleware('role:gestionnaire,pharmacien');
+    Route::apiResource('medecin', MedecinController::class)->middleware('role:gestionnaire,pharmacien');
+    Route::apiResource('medicament', MedicamentController::class)->middleware('role:caissier,gestionnaire,pharmacien');
+    Route::apiResource('ordonnance', OrdonnanceController::class)->middleware('role:gestionnaire,pharmacien');
         
         });
 
 Route::post('/login', [AuthController::class, 'login']);
-

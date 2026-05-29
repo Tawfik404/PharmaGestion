@@ -28,7 +28,7 @@ class StoreAdminRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', 'unique:admins,email'],
             'password' => ['required', 'string', 'min:6'],
             'telephone' => ['required', 'string', 'max:50'],
-            'role' => ['required', 'in:pharmacien,caissier,gestionnaire'],
+            'role' => ['required', 'in:gestionnaire,caissier,pharmacien'],
         ];
     }
 

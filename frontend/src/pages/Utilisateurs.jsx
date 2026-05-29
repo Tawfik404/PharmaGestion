@@ -5,16 +5,16 @@ import Modal from '../components/ui/Modal'
 import { useAuth } from '../context/AuthContext'
 import { createAdmin, listAdmins, updateAdmin, buildAdminPayload } from '../services/admins'
 
-const roleLabels = { pharmacien: 'Pharmacien', caissier: 'Caissier', gestionnaire: 'Gestionnaire' }
+const roleLabels = { gestionnaire: 'Gestionnaire', caissier: 'Caissier', pharmacien: 'Pharmacien' }
 const roleColors = {
-  pharmacien: { bg: '#dbeafe', color: '#2563eb' },
+  gestionnaire: { bg: '#dbeafe', color: '#2563eb' },
   caissier: { bg: '#d1fae5', color: '#059669' },
-  gestionnaire: { bg: '#fef3c7', color: '#d97706' },
+  pharmacien: { bg: '#fef3c7', color: '#d97706' },
 }
 const rolePermissions = {
-  pharmacien: ['Tableau de bord', 'Medicaments', 'Stock', 'Ordonnances', 'Point de Vente', 'Clients', 'Fournisseurs', 'Rapports', 'Utilisateurs'],
+  gestionnaire: ['Tableau de bord', 'Medicaments', 'Stock', 'Ordonnances', 'Point de Vente', 'Clients', 'Fournisseurs', 'Rapports', 'Utilisateurs'],
   caissier: ['Tableau de bord', 'Point de Vente', 'Clients'],
-  gestionnaire: ['Tableau de bord', 'Medicaments', 'Stock', 'Fournisseurs', 'Rapports'],
+  pharmacien: ['Tableau de bord', 'Medicaments', 'Stock', 'Clients', 'Fournisseurs', 'Rapports'],
 }
 
 const EMPTY_FORM = {
@@ -175,9 +175,9 @@ export default function Utilisateurs() {
           </div>
           <div className="form-group"><label>Role</label>
             <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-              <option value="pharmacien">Pharmacien</option>
-              <option value="caissier">Caissier</option>
               <option value="gestionnaire">Gestionnaire</option>
+              <option value="caissier">Caissier</option>
+              <option value="pharmacien">Pharmacien</option>
             </select>
           </div>
           <div className="form-group"><label>{editingUser ? 'Mot de passe (laisser vide pour conserver)' : 'Mot de passe'}</label><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>

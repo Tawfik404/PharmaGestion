@@ -26,6 +26,16 @@ const reportTypes = [
 
 const chartColors = ['#2563eb', '#059669', '#d97706', '#dc2626', '#64748b', '#0891b2']
 
+function getErrorMessage(error) {
+  return error?.message ?? 'Une erreur est survenue pendant le chargement des rapports.'
+}
+
+function collectRejectedMessages(results) {
+  return results
+    .filter((result) => result.status === 'rejected')
+    .map((result) => getErrorMessage(result.reason))
+}
+
 export default function Rapports() {
   const { hasPermission } = useAuth()
   const [activeReport, setActiveReport] = useState('ventes')
@@ -40,10 +50,6 @@ export default function Rapports() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    chargerRapports()
-  }, [])
-
   async function chargerRapports() {
     if (!hasPermission('rapports')) {
       setError('Acces non autorise a cette section.')
@@ -54,7 +60,7 @@ export default function Rapports() {
     try {
       setLoading(true)
       setError('')
-      const [medicamentsResponse, ventesResponse, fournisseursResponse] = await Promise.all([
+      const dataResults = await Promise.allSettled([
         listMedicaments(),
         listVentes(),
         listFournisseurs(),
@@ -66,30 +72,36 @@ export default function Rapports() {
         fetchSuppliersReport(),
         fetchMedicinesReport(),
       ])
+      const [medicamentsResult, ventesResult, fournisseursResult] = dataResults
       const [salesResult, stockResult, financialResult, suppliersResult, medicinesResult] = reportResults
 
-      setMedications(medicamentsResponse.map(normalizeMedicament))
-      setVentes(ventesResponse.map(normalizeVente))
-      setFournisseurs(fournisseursResponse)
+      setMedications(medicamentsResult.status === 'fulfilled' ? medicamentsResult.value.map(normalizeMedicament) : [])
+      setVentes(ventesResult.status === 'fulfilled' ? ventesResult.value.map(normalizeVente) : [])
+      setFournisseurs(fournisseursResult.status === 'fulfilled' ? fournisseursResult.value : [])
       setSalesReport(salesResult.status === 'fulfilled' ? salesResult.value : null)
       setStockReport(stockResult.status === 'fulfilled' ? stockResult.value : null)
       setFinancialReport(financialResult.status === 'fulfilled' ? financialResult.value : null)
       setSuppliersReport(suppliersResult.status === 'fulfilled' ? suppliersResult.value : null)
       setMedicinesReport(medicinesResult.status === 'fulfilled' ? medicinesResult.value : null)
 
-      const reportErrors = reportResults
-        .filter((result) => result.status === 'rejected')
-        .map((result) => result.reason?.message)
-        .filter(Boolean)
-      if (reportErrors.length > 0) {
-        setError(reportErrors[0])
+      const loadErrors = [...collectRejectedMessages(dataResults), ...collectRejectedMessages(reportResults)]
+      if (loadErrors.length > 0) {
+        setError(loadErrors[0])
       }
     } catch (err) {
-      setError(err.message)
+      setError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      void chargerRapports()
+    })
+    // Le chargement initial doit rester execute une seule fois au montage.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const totalVentes = Number(salesReport?.montant_total_ventes ?? 0)
   const totalAchats = Number(financialReport?.achats_fournisseurs ?? 0)

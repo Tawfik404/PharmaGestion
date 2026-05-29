@@ -14,32 +14,32 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
+        # test accounts:
+        Admin::create([
+            'nom' => 'tawfik',
+            'prenom' => 'gestionnaire',
+            'email' => 'gestionnaire@gmail.com',
+            'password' => Hash::make("gestionnaire"),
+            'telephone' => "06123456789",
+            'role' => "gestionnaire",
+        ]);
 
-#test accounts:
-               Admin::create([
-        'nom'=>'tawfik',
-        'prenom'=>'pharmacien',
-        'email'=>'pharmacien@gmail.com',
-        'password'=>Hash::make("pharmacien"),
-        'telephone'=>"06123456789",
-        'role'=>"pharmacien",
-       ]);
         Admin::create([
-        'nom'=>'Ehsan',
-        'prenom'=>'caissier',
-        'email'=>'caissier@gmail.com',
-        'password'=>Hash::make("caissier"),
-        'telephone'=>"06123456789",
-        'role'=>"caissier",
-       ]);
-       
+            'nom' => 'Ehsan',
+            'prenom' => 'caissier',
+            'email' => 'caissier@gmail.com',
+            'password' => Hash::make("caissier"),
+            'telephone' => "06123456789",
+            'role' => "caissier",
+        ]);
+
         Admin::create([
-        'nom'=>'tawfik',
-        'prenom'=>'gestionnaire',
-        'email'=>'gestionnaire@gmail.com',
-        'password'=>Hash::make("gestionnaire"),
-        'telephone'=>"06123456789",
-        'role'=>"gestionnaire",
-       ]);
+            'nom' => 'tawfik',
+            'prenom' => 'pharmacien',
+            'email' => 'pharmacien@gmail.com',
+            'password' => Hash::make("pharmacien"),
+            'telephone' => "06123456789",
+            'role' => "pharmacien",
+        ]);
     }
 }

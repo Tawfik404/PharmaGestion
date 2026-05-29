@@ -32,7 +32,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
   const navigate = useNavigate()
   const { user, logout, hasPermission } = useAuth()
 
-  const roleLabels = { pharmacien: 'Pharmacien', caissier: 'Caissier', gestionnaire: 'Gestionnaire' }
+  const roleLabels = { gestionnaire: 'Gestionnaire', caissier: 'Caissier', pharmacien: 'Pharmacien' }
 
   return (
     <>

@@ -30,7 +30,7 @@ class UpdateAdminRequest extends FormRequest
             'email' => ['sometimes', 'email', 'max:255', 'unique:admins,email,'.$adminId],
             'password' => ['sometimes', 'string', 'min:6'],
             'telephone' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'role' => ['sometimes', 'in:pharmacien,caissier,gestionnaire'],
+            'role' => ['sometimes', 'in:gestionnaire,caissier,pharmacien'],
         ];
     }
 

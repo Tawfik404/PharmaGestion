@@ -13,7 +13,7 @@ Route::get('/run-migrations', function () {
         abort(403);
     }
     
-    Artisan::call('migrate', ['--seed' => true, '--force' => true]);
+    Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
     return response()->json([
         'output' => Artisan::output()
     ]);

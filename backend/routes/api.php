@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/fournisseur/{fournisseur}/orders', [FournisseurController::class, 'orders'])
         ->middleware('role:pharmacien,gestionnaire');
     Route::post('/fournisseur/{fournisseur}/orders', [FournisseurController::class, 'storeOrder'])
-        ->middleware('role:pharmacien,gestionnaire');
+        ->middleware('role:gestionnaire');
     Route::get('/fournisseur/{fournisseur}/stats', [FournisseurController::class, 'stats'])
         ->middleware('role:pharmacien,gestionnaire');
 
@@ -60,8 +60,18 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     Route::apiResource('admin', AdminController::class)->middleware('role:gestionnaire');
-    Route::apiResource('client', ClientController::class)->middleware('role:caissier,gestionnaire,pharmacien');
-    Route::apiResource('fournisseur', FournisseurController::class)->middleware('role:gestionnaire,pharmacien');
+    Route::get('/client', [ClientController::class, 'index'])->middleware('role:caissier,gestionnaire,pharmacien');
+    Route::get('/client/{client}', [ClientController::class, 'show'])->middleware('role:caissier,gestionnaire,pharmacien');
+    Route::post('/client', [ClientController::class, 'store'])->middleware('role:caissier,gestionnaire');
+    Route::put('/client/{client}', [ClientController::class, 'update'])->middleware('role:caissier,gestionnaire');
+    Route::patch('/client/{client}', [ClientController::class, 'update'])->middleware('role:caissier,gestionnaire');
+    Route::delete('/client/{client}', [ClientController::class, 'destroy'])->middleware('role:caissier,gestionnaire');
+    Route::get('/fournisseur', [FournisseurController::class, 'index'])->middleware('role:gestionnaire,pharmacien');
+    Route::get('/fournisseur/{fournisseur}', [FournisseurController::class, 'show'])->middleware('role:gestionnaire,pharmacien');
+    Route::post('/fournisseur', [FournisseurController::class, 'store'])->middleware('role:gestionnaire');
+    Route::put('/fournisseur/{fournisseur}', [FournisseurController::class, 'update'])->middleware('role:gestionnaire');
+    Route::patch('/fournisseur/{fournisseur}', [FournisseurController::class, 'update'])->middleware('role:gestionnaire');
+    Route::delete('/fournisseur/{fournisseur}', [FournisseurController::class, 'destroy'])->middleware('role:gestionnaire');
     Route::apiResource('medecin', MedecinController::class)->middleware('role:gestionnaire,pharmacien');
     Route::get('/medicament', [MedicamentController::class, 'index'])->middleware('role:caissier,gestionnaire,pharmacien');
     Route::get('/medicament/{medicament}', [MedicamentController::class, 'show'])->middleware('role:caissier,gestionnaire,pharmacien');

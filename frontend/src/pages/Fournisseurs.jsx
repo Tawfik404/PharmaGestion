@@ -6,6 +6,7 @@ import Modal from '../components/ui/Modal'
 import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
 import { formatCurrency, formatDate } from '../utils/helpers'
 import { listMedicaments, normalizeMedicament } from '../services/medicaments'
+import { useAuth } from '../context/AuthContext'
 import {
   buildFournisseurPayload,
   createFournisseur,
@@ -23,6 +24,8 @@ const EMPTY_FORM = { nom: '', contact: '', telephone: '', email: '', adresse: ''
 const EMPTY_ORDER = { medicamentId: '', quantite: '', prixUnitaire: '', date: '', notes: '' }
 
 export default function Fournisseurs() {
+  const { user } = useAuth()
+  const canEdit = user?.role?.toLowerCase().trim() !== 'pharmacien'
   const [fournList, setFournList] = useState([])
   const [medicaments, setMedicaments] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -177,15 +180,19 @@ export default function Fournisseurs() {
       header: 'Actions',
       render: (r) => (
         <div className="btn-group">
-          <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openOrder(r) }} title="Commander">
-            <HiOutlineTruck size={16} />
-          </button>
+          {canEdit && (
+            <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openOrder(r) }} title="Commander">
+              <HiOutlineTruck size={16} />
+            </button>
+          )}
           <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openStats(r) }} title="Statistiques">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>
           </button>
-          <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(r) }} title="Modifier">
-            <HiOutlinePencilSquare size={16} />
-          </button>
+          {canEdit && (
+            <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(r) }} title="Modifier">
+              <HiOutlinePencilSquare size={16} />
+            </button>
+          )}
         </div>
       ),
     },
@@ -204,7 +211,9 @@ export default function Fournisseurs() {
           <h1>Fournisseurs</h1>
           <p>Gestion des fournisseurs et commandes</p>
         </div>
-        <button className="btn btn-primary" onClick={openNew}><HiOutlinePlus size={16} /> Ajouter Fournisseur</button>
+        {canEdit && (
+          <button className="btn btn-primary" onClick={openNew}><HiOutlinePlus size={16} /> Ajouter Fournisseur</button>
+        )}
       </div>
 
       {error && <div className="login-error" style={{ marginBottom: 16 }}>{error}</div>}

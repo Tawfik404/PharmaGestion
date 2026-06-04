@@ -6,6 +6,7 @@ import Modal from '../components/ui/Modal'
 import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
 import { formatCurrency, formatDate } from '../utils/helpers'
 import { downloadRequest } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 import {
   buildClientPayload,
   createClient,
@@ -28,6 +29,8 @@ const EMPTY_FORM = {
 }
 
 export default function Clients() {
+  const { user } = useAuth()
+  const canEdit = user?.role?.toLowerCase().trim() !== 'pharmacien'
   const [clientList, setClientList] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState(null)
@@ -135,9 +138,11 @@ export default function Clients() {
           <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openStats(r) }} title="Statistiques">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>
           </button>
-          <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(r) }} title="Modifier">
-            <HiOutlinePencilSquare size={16} />
-          </button>
+          {canEdit && (
+            <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(r) }} title="Modifier">
+              <HiOutlinePencilSquare size={16} />
+            </button>
+          )}
         </div>
       ),
     },
@@ -159,7 +164,9 @@ export default function Clients() {
         </div>
         <div className="btn-group">
           <button className="btn btn-outline" onClick={handleExport}><HiOutlineArrowUpTray size={16} /> Exporter Excel</button>
-          <button className="btn btn-primary" onClick={openNew}><HiOutlinePlus size={16} /> Ajouter Client</button>
+          {canEdit && (
+            <button className="btn btn-primary" onClick={openNew}><HiOutlinePlus size={16} /> Ajouter Client</button>
+          )}
         </div>
       </div>
 

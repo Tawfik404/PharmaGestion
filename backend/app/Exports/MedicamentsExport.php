@@ -3,13 +3,36 @@
 namespace App\Exports;
 
 use App\Models\Medicament;
-use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class MedicamentsExport
+class MedicamentsExport implements FromArray, ShouldAutoSize, WithHeadings, WithTitle
 {
-    public function download()
+    public function headings(): array
     {
-        $lignes = Medicament::query()
+        return [
+            'Numero',
+            'Photo',
+            'Designation',
+            'Categorie',
+            "Prix d achat",
+            'Prix de vente',
+            'Quantite minimale',
+            'Quantite disponible',
+            'Utilisations',
+            'Contre-indications',
+            'Effets secondaires',
+            'Taux de prise en charge',
+            'Code-barres',
+            "Date d expiration",
+        ];
+    }
+
+    public function array(): array
+    {
+        return Medicament::query()
             ->orderBy('designation')
             ->get()
             ->map(fn (Medicament $medicament) => [
@@ -17,7 +40,7 @@ class MedicamentsExport
                 'Photo' => $medicament->photo,
                 'Designation' => $medicament->designation,
                 'Categorie' => $medicament->categorie,
-                'Prix d achat' => $this->formatMontant($medicament->prix_achat),
+                "Prix d achat" => $this->formatMontant($medicament->prix_achat),
                 'Prix de vente' => $this->formatMontant($medicament->prix_vente),
                 'Quantite minimale' => $this->formatQuantite($medicament->qte_min),
                 'Quantite disponible' => $this->formatQuantite($medicament->qte_dispo),
@@ -26,16 +49,14 @@ class MedicamentsExport
                 'Effets secondaires' => $medicament->effets_secondaires,
                 'Taux de prise en charge' => $this->formatPourcentage($medicament->taux_prise_en_charge),
                 'Code-barres' => $medicament->code_barre,
-                'Date d expiration' => $medicament->date_expiration?->format('d/m/Y'),
+                "Date d expiration" => $medicament->date_expiration?->format('d/m/Y'),
             ])
             ->toArray();
+    }
 
-        return Excel::create('medicaments', function ($excel) use ($lignes) {
-            $excel->sheet('Medicaments', function ($feuille) use ($lignes) {
-                $feuille->fromArray($lignes);
-                $feuille->setAutoSize(true);
-            });
-        })->download('xlsx');
+    public function title(): string
+    {
+        return 'Medicaments';
     }
 
     private function formatMontant($montant): string

@@ -4,7 +4,8 @@ import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineArrowUpTray, HiOutlineUs
 import DataTable from '../components/ui/Table'
 import Modal from '../components/ui/Modal'
 import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
-import { formatCurrency, formatDate, exportToExcel } from '../utils/helpers'
+import { formatCurrency, formatDate } from '../utils/helpers'
+import { downloadRequest } from '../services/api'
 import {
   buildClientPayload,
   createClient,
@@ -107,17 +108,12 @@ export default function Clients() {
     }
   }
 
-  const handleExport = () => {
-    exportToExcel(clientList.map((client) => ({
-      Nom: client.nom,
-      Prenom: client.prenom,
-      Telephone: client.telephone,
-      Email: client.email,
-      'Date Naissance': client.dateNaissance,
-      Adresse: client.adresse,
-      Reduction: client.aDroitReduction ? `${client.reduction}%` : 'Non',
-      'Achats Total': client.achatsTotal,
-    })), 'clients')
+  const handleExport = async () => {
+    try {
+      await downloadRequest('/client/export/excel', 'clients.xlsx')
+    } catch (err) {
+      setError('Erreur pendant l\'export : ' + err.message)
+    }
   }
 
   const columns = [

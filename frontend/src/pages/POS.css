@@ -204,6 +204,7 @@
   flex-direction: column;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
 .pos-cart-client {
@@ -227,6 +228,8 @@
   flex: 1;
   overflow-y: auto;
   padding: 12px 20px;
+  min-height: 0;
+  max-height: 50vh;
 }
 
 .pos-cart-empty {

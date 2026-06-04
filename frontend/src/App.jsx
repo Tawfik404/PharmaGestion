@@ -27,7 +27,7 @@ function PrivateLayout({ children, isSidebarOpen, toggleSidebar }) {
 }
 
 function App() {
-  const { user, loading } = useAuth()
+  const { user, loading, hasPermission } = useAuth()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
@@ -45,14 +45,21 @@ function App() {
     )
   }
 
+  const GuardedRoute = ({ children, perm }) => {
+    if (perm && !hasPermission(perm)) {
+      return <Navigate to="/" replace />
+    }
+    return children
+  }
+
   return (
     <PrivateLayout isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar}>
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/medicaments" element={<Medicaments />} />
         <Route path="/stock" element={<Stock />} />
-        <Route path="/ordonnances" element={<Ordonnances />} />
-        <Route path="/pos" element={<POS />} />
+        <Route path="/ordonnances" element={<GuardedRoute perm="ordonnances"><Ordonnances /></GuardedRoute>} />
+        <Route path="/pos" element={<GuardedRoute perm="pos"><POS /></GuardedRoute>} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/fournisseurs" element={<Fournisseurs />} />
         <Route path="/rapports" element={<Rapports />} />

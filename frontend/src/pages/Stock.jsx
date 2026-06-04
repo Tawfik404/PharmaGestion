@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import DataTable from '../components/ui/Table'
 import Modal from '../components/ui/Modal'
 import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
-import { formatCurrency, getStockLevel, exportToExcel } from '../utils/helpers'
+import { formatCurrency, getStockLevel } from '../utils/helpers'
+import { downloadRequest } from '../services/api'
 import { HiOutlineExclamationTriangle, HiOutlineCheckCircle, HiOutlineArchiveBox, HiOutlineArrowUpTray } from 'react-icons/hi2'
 import { listMedicamentsLowStock, listStockMovements, normalizeLowStock, normalizeStockMovement, replenishStock } from '../services/stock'
 import { listMedicaments, normalizeMedicament } from '../services/medicaments'
@@ -67,18 +68,16 @@ export default function Stock() {
     }
   }
 
-  const handleExportStock = () => {
-    exportToExcel(medications.map((m) => ({
-      Numero: `MED${String(m.numero).padStart(3, '0')}`,
-      Designation: m.designation,
-      'Qte Min': m.quantiteMin,
-      'Qte Disponible': m.quantiteDisponible,
-      Statut: getStockLevel(m.quantiteDisponible, m.quantiteMin).label,
-      Expiration: m.dateExpiration,
-    })), 'stock')
+  const handleExportStock = async () => {
+    try {
+      await downloadRequest('/medicament/export/excel', 'stock_pharmacie.xlsx')
+    } catch (err) {
+      setError('Erreur pendant l\'export : ' + err.message)
+    }
   }
 
   const stockColumns = [
+
     { header: 'N°', key: 'numero', render: (r) => <span style={{ fontWeight: 500, color: 'var(--primary)' }}>{`MED${String(r.numero).padStart(3, '0')}`}</span> },
     { header: 'Designation', key: 'designation', render: (r) => <strong>{r.designation}</strong> },
     { header: 'Qte Min', key: 'quantiteMin' },

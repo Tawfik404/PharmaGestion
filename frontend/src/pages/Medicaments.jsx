@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import MedicamentImage from '../components/ui/MedicamentImage'
 import DataTable from '../components/ui/Table'
 import Modal from '../components/ui/Modal'
-import { formatCurrency, formatDate, getStockLevel, exportToExcel } from '../utils/helpers'
+import { formatCurrency, formatDate, getStockLevel } from '../utils/helpers'
+import { downloadRequest } from '../services/api'
 import { CATEGORIES_MED } from '../constants/medicaments'
 import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineArrowUpTray } from 'react-icons/hi2'
+import { useAuth } from '../context/AuthContext'
 import {
   buildMedicamentFormData,
   createMedicament,
@@ -31,6 +33,9 @@ const EMPTY_FORM = {
 }
 
 export default function Medicaments() {
+  const { user } = useAuth()
+  const userRole = user?.role?.toLowerCase().trim()
+  const canEdit = userRole !== 'caissier'
   const [meds, setMeds] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
   const [editingMed, setEditingMed] = useState(null)
@@ -111,21 +116,16 @@ export default function Medicaments() {
     }
   }
 
-  const handleExport = () => {
-    exportToExcel(meds.map((m) => ({
-      Numero: `MED${String(m.numero).padStart(3, '0')}`,
-      Designation: m.designation,
-      Categorie: m.categorie,
-      'Prix Achat': m.prixAchat,
-      'Prix Vente': m.prixVente,
-      'Qte Disponible': m.quantiteDisponible,
-      'Qte Minimale': m.quantiteMin,
-      'Date Expiration': m.dateExpiration,
-      'Code Barres': m.codeBarres,
-    })), 'medicaments')
+  const handleExport = async () => {
+    try {
+      await downloadRequest('/medicament/export/excel', 'medicaments.xlsx')
+    } catch (err) {
+      setError('Erreur pendant l\'export : ' + err.message)
+    }
   }
 
   const columns = [
+
     { header: 'N°', key: 'numero', render: (r) => <span style={{ fontWeight: 500, color: 'var(--primary)' }}>{`MED${String(r.numero).padStart(3, '0')}`}</span> },
     { header: 'Designation', key: 'designation', render: (r) => <strong>{r.designation}</strong> },
     { header: 'Categorie', key: 'categorie', render: (r) => <span style={{ fontSize: 12, background: 'var(--primary-light)', color: 'var(--primary)', padding: '2px 8px', borderRadius: 4 }}>{r.categorie}</span> },
@@ -137,12 +137,16 @@ export default function Medicaments() {
     { header: 'Expire le', key: 'dateExpiration', render: (r) => formatDate(r.dateExpiration) },
     { header: 'Actions', render: (r) => (
       <div className="btn-group">
-        <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(r) }} title="Modifier">
-          <HiOutlinePencilSquare size={16} />
-        </button>
-        <button className="btn-icon danger" onClick={(e) => { e.stopPropagation(); handleDelete(r.id) }} title="Supprimer">
-          <HiOutlineTrash size={16} />
-        </button>
+        {canEdit && (
+          <>
+            <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(r) }} title="Modifier">
+              <HiOutlinePencilSquare size={16} />
+            </button>
+            <button className="btn-icon danger" onClick={(e) => { e.stopPropagation(); handleDelete(r.id) }} title="Supprimer">
+              <HiOutlineTrash size={16} />
+            </button>
+          </>
+        )}
       </div>
     )},
   ]
@@ -158,9 +162,11 @@ export default function Medicaments() {
           <button className="btn btn-outline" onClick={handleExport}>
             <HiOutlineArrowUpTray size={16} /> Exporter Excel
           </button>
-          <button className="btn btn-primary" onClick={openNew}>
-            <HiOutlinePlus size={16} /> Ajouter
-          </button>
+          {canEdit && (
+            <button className="btn btn-primary" onClick={openNew}>
+              <HiOutlinePlus size={16} /> Ajouter
+            </button>
+          )}
         </div>
       </div>
 
@@ -210,7 +216,7 @@ export default function Medicaments() {
         onClose={() => setViewModal(null)}
         title={viewModal?.designation || ''}
         large
-        footer={<><button className="btn btn-outline" onClick={() => setViewModal(null)}>Fermer</button><button className="btn btn-primary" onClick={() => { setViewModal(null); openEdit(viewModal) }}>Modifier</button></>}
+        footer={<><button className="btn btn-outline" onClick={() => setViewModal(null)}>Fermer</button>{canEdit && <button className="btn btn-primary" onClick={() => { setViewModal(null); openEdit(viewModal) }}>Modifier</button>}</>}
       >
         {viewModal && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, alignItems: 'start' }}>

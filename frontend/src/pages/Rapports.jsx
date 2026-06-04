@@ -3,7 +3,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { HiOutlineArrowUpTray, HiOutlineDocumentChartBar } from 'react-icons/hi2'
 import { useAuth } from '../context/AuthContext'
 import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
-import { formatCurrency, exportToExcel } from '../utils/helpers'
+import { formatCurrency } from '../utils/helpers'
+import { downloadRequest } from '../services/api'
 import { listMedicaments, normalizeMedicament } from '../services/medicaments'
 import { listFournisseurs } from '../services/fournisseurs'
 import { listVentes, normalizeVente } from '../services/ventes'
@@ -137,31 +138,23 @@ export default function Rapports() {
     marge: medicament.prixVente - medicament.prixAchat,
   }))
 
-  const handleExport = () => {
-    if (activeReport === 'ventes') {
-      exportToExcel(ventes.map((vente) => ({
-        Date: vente.date,
-        Client: vente.clientNom,
-        Articles: vente.articles,
-        Total: vente.total,
-        Reduction: vente.reduction,
-        Net: vente.net,
-        Caissier: vente.caissier,
-      })), 'ventes')
-    } else if (activeReport === 'stock') {
-      exportToExcel(medications.map((medicament) => ({
-        Medicament: medicament.designation,
-        Categorie: medicament.categorie,
-        'Qte Min': medicament.quantiteMin,
-        'Qte Dispo': medicament.quantiteDisponible,
-      })), 'stock')
-    } else if (activeReport === 'medicaments') {
-      exportToExcel(medications.map((medicament) => ({
-        Medicament: medicament.designation,
-        'Prix Achat': medicament.prixAchat,
-        'Prix Vente': medicament.prixVente,
-        Marge: (medicament.prixVente - medicament.prixAchat).toFixed(2),
-      })), 'medicaments')
+  const handleExport = async () => {
+    try {
+      if (activeReport === 'ventes') {
+        await downloadRequest('/vente/export/excel', 'rapport_ventes.xlsx')
+      } else if (activeReport === 'stock') {
+        await downloadRequest('/medicament/export/excel', 'rapport_stock.xlsx')
+      } else if (activeReport === 'medicaments') {
+        await downloadRequest('/medicament/export/excel', 'rapport_medicaments.xlsx')
+      } else if (activeReport === 'financier') {
+        // Optionnel: ajouter un export financier si nécessaire plus tard
+        alert('L\'export pour ce rapport n\'est pas encore disponible.')
+      } else if (activeReport === 'fournisseurs') {
+        // Optionnel: ajouter un export fournisseurs si nécessaire plus tard
+        alert('L\'export pour ce rapport n\'est pas encore disponible.')
+      }
+    } catch (err) {
+      setError('Erreur pendant l\'export : ' + err.message)
     }
   }
 

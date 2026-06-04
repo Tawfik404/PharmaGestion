@@ -34,7 +34,7 @@ export default function Dashboard() {
       const [medicamentsResponse, clientsResponse, ventesResponse] = await Promise.all([
         listMedicaments(),
         listClients(),
-        listVentes(),
+        hasPermission('pos') ? listVentes().catch(() => []) : Promise.resolve([]),
       ])
       const fournisseursResponse = hasPermission('fournisseurs')
         ? await listFournisseurs().catch(() => [])

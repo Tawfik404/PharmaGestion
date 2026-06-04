@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import './Header.css'
 
 export default function Header({ toggleSidebar }) {
-  const [search, setSearch] = useState('')
+  //const [search, setSearch] = useState('')
   const { logout } = useAuth()
   const navigate = useNavigate()
 
@@ -17,7 +17,7 @@ export default function Header({ toggleSidebar }) {
   return (
     <header className="header">
       <div className="header-left">
-        <button className="header-menu-btn" onClick={toggleSidebar}>
+        {/* <button className="header-menu-btn" onClick={toggleSidebar}>
           <HiBars3 size={24} />
         </button>
         <div className="header-search">
@@ -28,7 +28,7 @@ export default function Header({ toggleSidebar }) {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-        </div>
+        </div> */}
       </div>
       <div className="header-actions">
  

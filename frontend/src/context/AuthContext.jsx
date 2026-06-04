@@ -4,9 +4,9 @@ import { loginRequest, logoutRequest, meRequest } from '../services/auth'
 const AuthContext = createContext(null)
 
 const ROLE_PERMISSIONS = {
-  gestionnaire: ['dashboard','medicaments','stock','ordonnances','pos','clients','fournisseurs','rapports','utilisateurs'],
-  caissier: ['dashboard','pos','clients'],
-  pharmacien: ['dashboard','medicaments','stock','clients','fournisseurs','rapports'],
+  gestionnaire: ['dashboard','medicaments','stock','clients','fournisseurs','rapports','utilisateurs'],
+  caissier: ['dashboard','pos','clients','medicaments'],
+  pharmacien: ['dashboard','medicaments','stock','ordonnances','clients','fournisseurs','rapports'],
 }
 
 export function AuthProvider({ children }) {
@@ -63,7 +63,6 @@ export function AuthProvider({ children }) {
   const hasPermission = (perm) => {
     if (!user) return false
     const role = user.role?.toLowerCase().trim()
-    if (role === 'gestionnaire') return true
     return ROLE_PERMISSIONS[role]?.includes(perm)
   }
 

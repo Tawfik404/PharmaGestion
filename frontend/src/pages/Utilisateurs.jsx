@@ -14,7 +14,7 @@ const roleColors = {
 const rolePermissions = {
   gestionnaire: ['Tableau de bord', 'Medicaments', 'Stock', 'Ordonnances', 'Point de Vente', 'Clients', 'Fournisseurs', 'Rapports', 'Utilisateurs'],
   caissier: ['Tableau de bord', 'Point de Vente', 'Clients'],
-  pharmacien: ['Tableau de bord', 'Medicaments', 'Stock', 'Clients', 'Fournisseurs', 'Rapports'],
+  pharmacien: ['Tableau de bord', 'Medicaments', 'Stock', 'Ordonnances', 'Clients', 'Fournisseurs', 'Rapports'],
 }
 
 const EMPTY_FORM = {

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\VentesExport;
 use App\Models\Client;
 use App\Models\Medicament;
 use App\Models\StockMovement;
 use App\Models\Vente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class VenteController
 {
@@ -122,5 +124,10 @@ class VenteController
     public function show(Vente $vente)
     {
         return response()->json(['donnees' => $vente->load(['client', 'admin', 'items.medicament'])]);
+    }
+
+    public function export()
+    {
+        return Excel::download(new VentesExport, now()->format('Y-m-d_H-i-s').'_ventes.xlsx');
     }
 }

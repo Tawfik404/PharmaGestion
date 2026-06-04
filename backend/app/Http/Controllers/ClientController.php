@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ClientsExport;
 use App\Models\Client;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ClientController
 {
@@ -38,24 +40,15 @@ class ClientController
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreClientRequest $request)
     {
-        //
         $client = Client::create($request->validated());
 
         return response()->json([
-        'message' => 'Client ajouté avec succès',
-        'donnees' => $client,
+            'message' => 'Client ajouté avec succès',
+            'donnees' => $client,
         ]);
     }
 
@@ -64,18 +57,9 @@ class ClientController
      */
     public function show(Client $client)
     {
-        //
         return response()->json([
             'donnees' => $client
         ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Client $client)
-    {
-        //
     }
 
     /**
@@ -85,10 +69,10 @@ class ClientController
     {
         $client->update($request->validated());
 
-    return response()->json([
-        'message' => 'Client mis à jour avec succès',
-        'donnees' => $client
-    ]);
+        return response()->json([
+            'message' => 'Client mis à jour avec succès',
+            'donnees' => $client
+        ]);
     }
 
     /**
@@ -129,4 +113,8 @@ class ClientController
         ]);
     }
 
+    public function export()
+    {
+        return Excel::download(new ClientsExport, now()->format('Y-m-d_H-i-s').'_clients.xlsx');
+    }
 }

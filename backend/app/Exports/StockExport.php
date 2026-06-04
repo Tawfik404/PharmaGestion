@@ -3,13 +3,32 @@
 namespace App\Exports;
 
 use App\Models\StockMovement;
-use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class StockExport
+class StockExport implements FromArray, ShouldAutoSize, WithHeadings, WithTitle
 {
-    public function download()
+    public function headings(): array
     {
-        $lignes = StockMovement::query()
+        return [
+            'Identifiant',
+            'Medicament',
+            'Code-barres',
+            'Type de mouvement',
+            'Quantite',
+            'Stock avant',
+            'Stock apres',
+            'Cout unitaire',
+            'Notes',
+            'Date du mouvement',
+        ];
+    }
+
+    public function array(): array
+    {
+        return StockMovement::query()
             ->with('medicament')
             ->latest()
             ->get()
@@ -26,13 +45,11 @@ class StockExport
                 'Date du mouvement' => $mouvement->created_at?->format('d/m/Y H:i'),
             ])
             ->toArray();
+    }
 
-        return Excel::create('stock_pharmacie', function ($excel) use ($lignes) {
-            $excel->sheet('Stock pharmacie', function ($feuille) use ($lignes) {
-                $feuille->fromArray($lignes);
-                $feuille->setAutoSize(true);
-            });
-        })->download('xlsx');
+    public function title(): string
+    {
+        return 'Stock pharmacie';
     }
 
     private function libelleType(string $type): string

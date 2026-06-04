@@ -13,7 +13,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "laravel/vapor-core": "^2.43",
-        "maatwebsite/excel": "^1.1"
+        "maatwebsite/excel": "4.x-dev"
     },
     "require-dev": {
         "laravel/pail": "^1.2.5",
@@ -84,6 +84,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\StockExport;
 use App\Models\StockMovement;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StockController
 {
@@ -25,6 +26,6 @@ class StockController
 
     public function export()
     {
-        return (new StockExport)->download();
+        return Excel::download(new StockExport, now()->format('Y-m-d_H-i-s').'_stock_pharmacie.xlsx');
     }
 }

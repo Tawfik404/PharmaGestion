@@ -1,20 +1,3 @@
-import * as XLSX from 'xlsx'
-
-export function exportToExcel(data, sectionTitle) {
-  const date = new Date().toISOString().split('T')[0]
-  const sanitizedTitle = sectionTitle.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove accents
-    .replace(/[^a-z0-9]/g, '_')                     // replace non-alphanumeric with _
-    .replace(/_+/g, '_')                            // collapse multiple underscores
-    .replace(/^_|_$/g, '')                          // trim underscores
-  
-  const filename = `${sanitizedTitle}_${date}`
-  const ws = XLSX.utils.json_to_sheet(data)
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
-  XLSX.writeFile(wb, `${filename}.xlsx`)
-}
-
 export function formatCurrency(val) {
   return new Intl.NumberFormat('fr-MA', { style: 'decimal', minimumFractionDigits: 2 }).format(val) + ' DH'
 }

@@ -11,6 +11,7 @@ use Cloudinary\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MedicamentController
 {
@@ -169,7 +170,7 @@ class MedicamentController
 
     public function export()
     {
-        return (new MedicamentsExport)->download();
+        return Excel::download(new MedicamentsExport, now()->format('Y-m-d_H-i-s').'_medicaments.xlsx');
     }
 
     private function storePhoto(Request $request): string

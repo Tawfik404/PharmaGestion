@@ -19,12 +19,13 @@ class CheckRole
 
         $userRole = strtolower(trim($user->role));
 
-        // Gestionnaire est le super-admin (acces complet)
-        if ($userRole === 'gestionnaire') {
+        $normalizedRoles = array_map(fn($r) => strtolower(trim($r)), $roles);
+
+        // Gestionnaire est le super-admin (acces complet), sauf pour les modules
+        // ou il n'est pas explicitement autorise (Ordonnance, Point de vente).
+        if ($userRole === 'gestionnaire' && in_array('gestionnaire', $normalizedRoles, true)) {
             return $next($request);
         }
-
-        $normalizedRoles = array_map(fn($r) => strtolower(trim($r)), $roles);
 
         if (! in_array($userRole, $normalizedRoles, true)) {
             \Log::warning('Auth check failed: Role mismatch.', [

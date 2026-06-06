@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/client/{client}/stats', [ClientController::class, 'stats'])
         ->middleware('role:pharmacien,gestionnaire');
     Route::get('/client/export/excel', [ClientController::class, 'export'])
-        ->middleware('role:pharmacien,gestionnaire');
+        ->middleware('role:caissier,pharmacien,gestionnaire');
 
     Route::get('/stock', [StockController::class, 'index'])
         ->middleware('role:pharmacien,gestionnaire');

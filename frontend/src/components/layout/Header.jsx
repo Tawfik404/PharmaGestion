@@ -17,10 +17,10 @@ export default function Header({ toggleSidebar }) {
   return (
     <header className="header">
       <div className="header-left">
-        {/* <button className="header-menu-btn" onClick={toggleSidebar}>
+        <button className="header-menu-btn" onClick={toggleSidebar}>
           <HiBars3 size={24} />
         </button>
-        <div className="header-search">
+        {/* <div className="header-search">
           <HiOutlineMagnifyingGlass />
           <input
             type="text"

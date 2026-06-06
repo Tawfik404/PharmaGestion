@@ -8,13 +8,3 @@ Route::get('/', function () {
 });
 
 
-Route::get('/run-migrations', function () {
-    if (request('token') !== env('MIGRATE_TOKEN')) {
-        abort(403);
-    }
-    
-    Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
-    return response()->json([
-        'output' => Artisan::output()
-    ]);
-});

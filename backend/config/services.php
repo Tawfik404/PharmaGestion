@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'cloudinary' => [
+        'cloud_url' => env('CLOUDINARY_URL'),
+    ],
+
 ];

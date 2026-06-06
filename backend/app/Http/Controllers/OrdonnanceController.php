@@ -46,7 +46,7 @@ class OrdonnanceController
 
         $ordonnance = DB::transaction(function () use ($donnees) {
             $ordonnance = Ordonnance::create([
-                'numero' => $donnees['numero'] ?: $this->genererNumero(),
+                'numero' => ($donnees['numero'] ?? null) ?: $this->genererNumero(),
                 'client_id' => $donnees['client_id'],
                 'medecin_id' => $donnees['medecin_id'] ?? null,
                 'date_ordonnance' => $donnees['date_ordonnance'],

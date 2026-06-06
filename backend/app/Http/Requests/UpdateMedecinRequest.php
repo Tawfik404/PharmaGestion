@@ -12,7 +12,7 @@ class UpdateMedecinRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,15 @@ class UpdateMedecinRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'nom' => ['sometimes', 'string', 'max:255'],
+            'prenom' => ['sometimes', 'string', 'max:255'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'max' => 'Le champ :attribute ne doit pas depasser :max caracteres.',
         ];
     }
 }

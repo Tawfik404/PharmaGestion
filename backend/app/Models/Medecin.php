@@ -9,4 +9,11 @@ class Medecin extends Model
 {
     /** @use HasFactory<\Database\Factories\MedecinFactory> */
     use HasFactory;
+
+    protected $guarded = [];
+
+    public function ordonnances()
+    {
+        return $this->hasMany(Ordonnance::class);
+    }
 }

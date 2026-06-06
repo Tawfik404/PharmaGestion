@@ -153,20 +153,22 @@ export default function POS() {
             ))}
           </div>
 
-          <div className="pos-cart-discount">
-            <label>Reduction (%)</label>
-            <input type="number" min="0" max="100" value={discount} onChange={(e) => setDiscount(parseInt(e.target.value, 10) || 0)} />
-          </div>
+          <div className="pos-cart-footer">
+            <div className="pos-cart-discount">
+              <label>Reduction (%)</label>
+              <input type="number" min="0" max="100" value={discount} onChange={(e) => setDiscount(parseInt(e.target.value, 10) || 0)} />
+            </div>
 
-          <div className="pos-cart-totals">
-            <div className="pos-total-row"><span>Sous-total</span><span>{formatCurrency(subtotal)}</span></div>
-            {discount > 0 && <div className="pos-total-row discount"><span>Reduction ({discount}%)</span><span>-{formatCurrency(discountAmount)}</span></div>}
-            <div className="pos-total-row total"><span>Total</span><span>{formatCurrency(total)}</span></div>
-          </div>
+            <div className="pos-cart-totals">
+              <div className="pos-total-row"><span>Sous-total</span><span>{formatCurrency(subtotal)}</span></div>
+              {discount > 0 && <div className="pos-total-row discount"><span>Reduction ({discount}%)</span><span>-{formatCurrency(discountAmount)}</span></div>}
+              <div className="pos-total-row total"><span>Total</span><span>{formatCurrency(total)}</span></div>
+            </div>
 
-          <button className="pos-checkout" onClick={handleCheckout} disabled={cart.length === 0}>
-            Valider la vente - {formatCurrency(total)}
-          </button>
+            <button className="pos-checkout" onClick={handleCheckout} disabled={cart.length === 0}>
+              Valider la vente - {formatCurrency(total)}
+            </button>
+          </div>
         </div>
       </div>
 

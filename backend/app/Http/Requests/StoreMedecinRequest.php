@@ -12,7 +12,7 @@ class StoreMedecinRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,16 @@ class StoreMedecinRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'nom' => ['required', 'string', 'max:255'],
+            'prenom' => ['required', 'string', 'max:255'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'required' => 'Le champ :attribute est obligatoire.',
+            'max' => 'Le champ :attribute ne doit pas depasser :max caracteres.',
         ];
     }
 }

@@ -36,13 +36,13 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('role:pharmacien,gestionnaire');
 
     Route::get('/vente', [VenteController::class, 'index'])
-        ->middleware('role:caissier,pharmacien');
+        ->middleware('role:caissier,pharmacien,gestionnaire');
     Route::get('/vente/export/excel', [VenteController::class, 'export'])
         ->middleware('role:pharmacien');
     Route::post('/vente', [VenteController::class, 'store'])
         ->middleware('role:caissier,pharmacien');
     Route::get('/vente/{vente}', [VenteController::class, 'show'])
-        ->middleware('role:caissier,pharmacien');
+        ->middleware('role:caissier,pharmacien,gestionnaire');
 
     Route::get('/fournisseur/{fournisseur}/orders', [FournisseurController::class, 'orders'])
         ->middleware('role:pharmacien,gestionnaire');

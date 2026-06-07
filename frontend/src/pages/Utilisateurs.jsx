@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineShieldCheck } from 'react-icons/hi2'
+import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineShieldCheck } from 'react-icons/hi2'
 import DataTable from '../components/ui/Table'
 import Modal from '../components/ui/Modal'
 import { useAuth } from '../context/AuthContext'
-import { createAdmin, listAdmins, updateAdmin, buildAdminPayload } from '../services/admins'
+import { createAdmin, deleteAdmin, listAdmins, updateAdmin, buildAdminPayload } from '../services/admins'
 
 const roleLabels = { gestionnaire: 'Gestionnaire', caissier: 'Caissier', pharmacien: 'Pharmacien' }
 const roleColors = {
@@ -27,7 +27,8 @@ const EMPTY_FORM = {
 }
 
 export default function Utilisateurs() {
-  const { hasPermission } = useAuth()
+  const { hasPermission, user } = useAuth()
+  const userRole = user?.role?.toLowerCase().trim()
   const [users, setUsers] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
   const [permModal, setPermModal] = useState(null)
@@ -80,6 +81,17 @@ export default function Utilisateurs() {
     setModalOpen(true)
   }
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Supprimer cet utilisateur ?')) return
+    try {
+      setError('')
+      await deleteAdmin(id)
+      setUsers((current) => current.filter((item) => item.id !== id))
+    } catch (err) {
+      setError(err.status === 403 ? 'Acces non autorise a cette action.' : err.message)
+    }
+  }
+
   const handleSave = async () => {
     try {
       setSaving(true)
@@ -125,6 +137,11 @@ export default function Utilisateurs() {
           <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(r) }} title="Modifier">
             <HiOutlinePencilSquare size={16} />
           </button>
+          {userRole === 'gestionnaire' && (
+            <button className="btn-icon danger" onClick={(e) => { e.stopPropagation(); handleDelete(r.id) }} title="Supprimer">
+              <HiOutlineTrash size={16} />
+            </button>
+          )}
         </div>
       ),
     },

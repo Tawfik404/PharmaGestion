@@ -151,6 +151,10 @@ export default function Medicaments() {
     )},
   ]
 
+  const visibleColumns = userRole === 'caissier'
+    ? columns.filter(col => col.header !== 'Actions')
+    : columns
+
   return (
     <div>
       <div className="page-header">
@@ -173,7 +177,7 @@ export default function Medicaments() {
       {error && <div className="login-error" style={{ marginBottom: 16 }}>{error}</div>}
 
       <DataTable
-        columns={columns}
+        columns={visibleColumns}
         data={meds}
         onRowClick={setViewModal}
         emptyText={loading ? 'Chargement...' : 'Aucun medicament disponible'}

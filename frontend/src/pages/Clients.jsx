@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineArrowUpTray, HiOutlineUserGroup } from 'react-icons/hi2'
+import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineArrowUpTray, HiOutlineUserGroup } from 'react-icons/hi2'
 import DataTable from '../components/ui/Table'
 import Modal from '../components/ui/Modal'
 import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext'
 import {
   buildClientPayload,
   createClient,
+  deleteClient,
   getClientStats,
   listClients,
   normalizeClient,
@@ -30,7 +31,9 @@ const EMPTY_FORM = {
 
 export default function Clients() {
   const { user } = useAuth()
-  const canEdit = user?.role?.toLowerCase().trim() !== 'pharmacien'
+  const userRole = user?.role?.toLowerCase().trim()
+  const canEdit = userRole !== 'pharmacien' && userRole !== 'caissier'
+  const isGestionnaire = userRole === 'gestionnaire'
   const [clientList, setClientList] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState(null)
@@ -111,6 +114,17 @@ export default function Clients() {
     }
   }
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Supprimer ce client ?')) return
+    try {
+      setError('')
+      await deleteClient(id)
+      setClientList((current) => current.filter((item) => item.id !== id))
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   const handleExport = async () => {
     try {
       await downloadRequest('/client/export/excel', 'clients.xlsx')
@@ -141,6 +155,11 @@ export default function Clients() {
           {canEdit && (
             <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(r) }} title="Modifier">
               <HiOutlinePencilSquare size={16} />
+            </button>
+          )}
+          {isGestionnaire && (
+            <button className="btn-icon danger" onClick={(e) => { e.stopPropagation(); handleDelete(r.id) }} title="Supprimer">
+              <HiOutlineTrash size={16} />
             </button>
           )}
         </div>

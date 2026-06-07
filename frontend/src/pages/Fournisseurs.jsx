@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTruck } from 'react-icons/hi2'
+import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineTruck } from 'react-icons/hi2'
 import DataTable from '../components/ui/Table'
 import Modal from '../components/ui/Modal'
 import { StatsCard, StatsGrid } from '../components/ui/StatsCard'
@@ -11,6 +11,7 @@ import {
   buildFournisseurPayload,
   createFournisseur,
   createFournisseurOrder,
+  deleteFournisseur,
   getFournisseurStats,
   listFournisseurOrders,
   listFournisseurs,
@@ -25,7 +26,9 @@ const EMPTY_ORDER = { medicamentId: '', quantite: '', prixUnitaire: '', date: ''
 
 export default function Fournisseurs() {
   const { user } = useAuth()
-  const canEdit = user?.role?.toLowerCase().trim() !== 'pharmacien'
+  const userRole = user?.role?.toLowerCase().trim()
+  const canEdit = userRole !== 'pharmacien'
+  const isGestionnaire = userRole === 'gestionnaire'
   const [fournList, setFournList] = useState([])
   const [medicaments, setMedicaments] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -138,6 +141,17 @@ export default function Fournisseurs() {
     }
   }
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Supprimer ce fournisseur ?')) return
+    try {
+      setError('')
+      await deleteFournisseur(id)
+      setFournList((current) => current.filter((item) => item.id !== id))
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   const handleOrderSave = async () => {
     if (!orderModal) return
 
@@ -191,6 +205,11 @@ export default function Fournisseurs() {
           {canEdit && (
             <button className="btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(r) }} title="Modifier">
               <HiOutlinePencilSquare size={16} />
+            </button>
+          )}
+          {isGestionnaire && (
+            <button className="btn-icon danger" onClick={(e) => { e.stopPropagation(); handleDelete(r.id) }} title="Supprimer">
+              <HiOutlineTrash size={16} />
             </button>
           )}
         </div>

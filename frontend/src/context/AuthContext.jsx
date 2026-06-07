@@ -4,7 +4,7 @@ import { loginRequest, logoutRequest, meRequest } from '../services/auth'
 const AuthContext = createContext(null)
 
 const ROLE_PERMISSIONS = {
-  gestionnaire: ['dashboard','medicaments','stock','clients','fournisseurs','rapports','utilisateurs'],
+  gestionnaire: ['dashboard','clients','fournisseurs','rapports','utilisateurs'],
   caissier: ['dashboard','pos','clients','medicaments'],
   pharmacien: ['dashboard','medicaments','stock','ordonnances','clients','fournisseurs','rapports'],
 }

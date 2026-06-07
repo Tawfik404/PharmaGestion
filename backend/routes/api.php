@@ -19,11 +19,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
 
     Route::get('/medicament/export/excel', [MedicamentController::class, 'export'])
-        ->middleware('role:pharmacien');
+        ->middleware('role:pharmacien,gestionnaire');
     Route::get('/medicament/alerts/low-stock', [MedicamentController::class, 'lowStock']);
     Route::get('/medicament/barcode/{barcode}', [MedicamentController::class, 'barcode']);
     Route::post('/medicament/{medicament}/replenish', [MedicamentController::class, 'replenish'])
-        ->middleware('role:pharmacien');
+        ->middleware('role:gestionnaire');
 
     Route::get('/client/{client}/stats', [ClientController::class, 'stats'])
         ->middleware('role:caissier,pharmacien,gestionnaire');
@@ -38,9 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/vente', [VenteController::class, 'index'])
         ->middleware('role:caissier,pharmacien,gestionnaire');
     Route::get('/vente/export/excel', [VenteController::class, 'export'])
-        ->middleware('role:pharmacien');
+        ->middleware('role:gestionnaire');
     Route::post('/vente', [VenteController::class, 'store'])
-        ->middleware('role:caissier,pharmacien');
+        ->middleware('role:caissier');
     Route::get('/vente/{vente}', [VenteController::class, 'show'])
         ->middleware('role:caissier,pharmacien,gestionnaire');
 
@@ -51,12 +51,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/fournisseur/{fournisseur}/stats', [FournisseurController::class, 'stats'])
         ->middleware('role:pharmacien,gestionnaire');
 
-    Route::prefix('reports')->middleware('role:pharmacien,gestionnaire')->group(function () {
-        Route::get('/sales', [ReportController::class, 'sales']);
-        Route::get('/stock', [ReportController::class, 'stock']);
-        Route::get('/financial', [ReportController::class, 'financial']);
-        Route::get('/suppliers', [ReportController::class, 'suppliers']);
-        Route::get('/medicines', [ReportController::class, 'medicines']);
+    Route::prefix('reports')->group(function () {
+        Route::get('/sales', [ReportController::class, 'sales'])->middleware('role:pharmacien,gestionnaire');
+        Route::get('/stock', [ReportController::class, 'stock'])->middleware('role:pharmacien,gestionnaire');
+        Route::get('/financial', [ReportController::class, 'financial'])->middleware('role:pharmacien,gestionnaire');
+        Route::get('/suppliers', [ReportController::class, 'suppliers'])->middleware('role:pharmacien,gestionnaire');
+        Route::get('/medicines', [ReportController::class, 'medicines'])->middleware('role:pharmacien,gestionnaire');
     });
     
     Route::apiResource('admin', AdminController::class)->middleware('role:gestionnaire');
@@ -75,10 +75,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('medecin', MedecinController::class)->middleware('role:gestionnaire,pharmacien');
     Route::get('/medicament', [MedicamentController::class, 'index'])->middleware('role:caissier,gestionnaire,pharmacien');
     Route::get('/medicament/{medicament}', [MedicamentController::class, 'show'])->middleware('role:caissier,gestionnaire,pharmacien');
-    Route::post('/medicament', [MedicamentController::class, 'store'])->middleware('role:pharmacien');
-    Route::put('/medicament/{medicament}', [MedicamentController::class, 'update'])->middleware('role:pharmacien');
-    Route::patch('/medicament/{medicament}', [MedicamentController::class, 'update'])->middleware('role:pharmacien');
-    Route::delete('/medicament/{medicament}', [MedicamentController::class, 'destroy'])->middleware('role:pharmacien');
+    Route::post('/medicament', [MedicamentController::class, 'store'])->middleware('role:gestionnaire');
+    Route::put('/medicament/{medicament}', [MedicamentController::class, 'update'])->middleware('role:gestionnaire');
+    Route::patch('/medicament/{medicament}', [MedicamentController::class, 'update'])->middleware('role:gestionnaire');
+    Route::delete('/medicament/{medicament}', [MedicamentController::class, 'destroy'])->middleware('role:gestionnaire');
     Route::apiResource('ordonnance', OrdonnanceController::class)->middleware('role:pharmacien');
         
         });

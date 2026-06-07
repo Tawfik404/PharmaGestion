@@ -38,8 +38,13 @@ function collectRejectedMessages(results) {
 }
 
 export default function Rapports() {
-  const { hasPermission } = useAuth()
-  const [activeReport, setActiveReport] = useState('ventes')
+  const { hasPermission, user } = useAuth()
+  const userRole = user?.role?.toLowerCase().trim()
+  const visibleReports = userRole === 'pharmacien'
+    ? reportTypes.filter(r => r.id === 'stock' || r.id === 'medicaments')
+    : reportTypes
+  const defaultReport = visibleReports.length > 0 ? visibleReports[0].id : null
+  const [activeReport, setActiveReport] = useState(defaultReport)
   const [medications, setMedications] = useState([])
   const [ventes, setVentes] = useState([])
   const [fournisseurs, setFournisseurs] = useState([])
@@ -173,7 +178,7 @@ export default function Rapports() {
       {error && <div className="login-error" style={{ marginBottom: 16 }}>{error}</div>}
 
       <div className="rapports-tabs">
-        {reportTypes.map((report) => (
+        {visibleReports.map((report) => (
           <button key={report.id} className={`rapports-tab ${activeReport === report.id ? 'active' : ''}`} onClick={() => setActiveReport(report.id)}>
             {report.label}
           </button>

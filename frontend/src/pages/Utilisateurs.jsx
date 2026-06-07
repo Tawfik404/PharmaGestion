@@ -12,7 +12,7 @@ const roleColors = {
   pharmacien: { bg: '#fef3c7', color: '#d97706' },
 }
 const rolePermissions = {
-  gestionnaire: ['Tableau de bord', 'Medicaments', 'Stock', 'Ordonnances', 'Point de Vente', 'Clients', 'Fournisseurs', 'Rapports', 'Utilisateurs'],
+  gestionnaire: ['Tableau de bord', 'Clients', 'Fournisseurs', 'Rapports', 'Utilisateurs'],
   caissier: ['Tableau de bord', 'Point de Vente', 'Clients'],
   pharmacien: ['Tableau de bord', 'Medicaments', 'Stock', 'Ordonnances', 'Clients', 'Fournisseurs', 'Rapports'],
 }

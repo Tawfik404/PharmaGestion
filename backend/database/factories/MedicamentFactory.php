@@ -53,7 +53,7 @@ class MedicamentFactory extends Factory
             'designation' => $med['designation'],
             'categorie' => $med['categorie'],
             'prix_achat' => $med['prix_achat'],
-            'prix_vente' => $med['prix_vente'],
+            'prix_vente' => fake()->numberBetween(50, 500),
             'qte_min' => fake()->randomElement([10, 15, 20, 25, 30, 50]),
             'qte_dispo' => fake()->randomElement([0, 2, 5, 8, 12, 25, 45, 60, 100, 150, 200, 300]),
             'taux_prise_en_charge' => $med['taux_prise_en_charge'],

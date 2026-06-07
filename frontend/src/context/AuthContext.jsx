@@ -5,7 +5,7 @@ const AuthContext = createContext(null)
 
 const ROLE_PERMISSIONS = {
   gestionnaire: ['dashboard','clients','fournisseurs','rapports','utilisateurs'],
-  caissier: ['dashboard','pos','clients','medicaments'],
+  caissier: ['dashboard','pos','clients','medicaments','rapports'],
   pharmacien: ['dashboard','medicaments','stock','ordonnances','clients','fournisseurs','rapports'],
 }
 

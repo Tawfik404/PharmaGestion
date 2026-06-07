@@ -42,7 +42,9 @@ export default function Rapports() {
   const userRole = user?.role?.toLowerCase().trim()
   const visibleReports = userRole === 'pharmacien'
     ? reportTypes.filter(r => r.id === 'stock' || r.id === 'medicaments')
-    : reportTypes
+    : userRole === 'caissier'
+      ? reportTypes.filter(r => r.id === 'ventes')
+      : reportTypes
   const defaultReport = visibleReports.length > 0 ? visibleReports[0].id : null
   const [activeReport, setActiveReport] = useState(defaultReport)
   const [medications, setMedications] = useState([])
